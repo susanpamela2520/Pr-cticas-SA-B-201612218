@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Confirmación</title>
+  <link rel="stylesheet" href="/css/estilos.css" />
+</head>
+<body>
+  <div class="tarjeta">
+    <h1 id="titulo">Verificando sesión...</h1>
+    <p class="subtitulo">Esta página solo se ve tras un login exitoso.</p>
+
+    <div id="resultadoRuta1" class="resultado-ruta" style="display: none;"></div>
+    <div id="resultadoRuta2" class="resultado-ruta" style="display: none;"></div>
+
+    <button id="btnRuta1">Probar Ruta 1 (solo Admin)</button>
+    <button id="btnRuta2" class="secundario">Probar Ruta 2 (Admin y Cliente)</button>
+    <button id="btnLogout" class="secundario">Cerrar sesión</button>
+  </div>
+
+  <script src="/js/confirmacion.js"></script>
+</body>
+</html>

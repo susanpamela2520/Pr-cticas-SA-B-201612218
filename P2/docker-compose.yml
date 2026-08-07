@@ -1,0 +1,20 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:16
+    container_name: auth_db_p2
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: auth_db
+    ports:
+      # 5433 en el host (no 5432) para poder correr esto al mismo tiempo
+      # que el Postgres de la Practica 1 sin que choquen los puertos.
+      - "5433:5432"
+    volumes:
+      - auth_db_p2_data:/var/lib/postgresql/data
+      - ./auth-service/src/infrastructure/database/migrations:/docker-entrypoint-initdb.d
+
+volumes:
+  auth_db_p2_data:

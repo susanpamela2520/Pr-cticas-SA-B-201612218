@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Iniciar sesión</title>
+  <link rel="stylesheet" href="/css/estilos.css" />
+</head>
+<body>
+  <div class="tarjeta">
+    <h1>Iniciar sesión</h1>
+    <p class="subtitulo">El token se guarda en una cookie HTTP-only — no es visible desde este JavaScript.</p>
+
+    <form id="formLogin">
+      <label for="correo">Correo</label>
+      <input id="correo" type="email" required placeholder="tucorreo@ejemplo.com" />
+
+      <label for="contrasena">Contraseña</label>
+      <input id="contrasena" type="password" required placeholder="Tu contraseña" />
+
+      <button type="submit">Ingresar</button>
+    </form>
+
+    <div id="mensaje" class="mensaje"></div>
+
+    <p class="enlace">¿No tienes cuenta? <a href="/registro.html">Regístrate</a></p>
+  </div>
+
+  <script src="/js/login.js"></script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registro</title>
+  <link rel="stylesheet" href="/css/estilos.css" />
+</head>
+<body>
+  <div class="tarjeta">
+    <h1>Crear cuenta</h1>
+    <p class="subtitulo">Tus datos se guardan cifrados con AES-256.</p>
+
+    <form id="formRegistro">
+      <label for="nombre">Nombre completo</label>
+      <input id="nombre" type="text" required minlength="2" placeholder="Susan Pamela" />
+
+      <label for="correo">Correo</label>
+      <input id="correo" type="email" required placeholder="tucorreo@ejemplo.com" />
+
+      <label for="contrasena">Contraseña</label>
+      <input id="contrasena" type="password" required minlength="8" placeholder="Mínimo 8 caracteres" />
+
+      <label for="rol">Rol</label>
+      <select id="rol">
+        <option value="Cliente">Cliente</option>
+        <option value="Admin">Admin</option>
+      </select>
+      <p class="subtitulo" style="margin-top: 6px; margin-bottom: 0;">
+        (En un sistema real el rol Admin no se auto-asignaría; aquí es
+        seleccionable solo para poder probar ambos roles fácilmente.)
+      </p>
+
+      <button type="submit">Registrarme</button>
+    </form>
+
+    <div id="mensaje" class="mensaje"></div>
+
+    <p class="enlace">¿Ya tienes cuenta? <a href="/login.html">Inicia sesión</a></p>
+  </div>
+
+  <script src="/js/registro.js"></script>
+</body>
+</html>
