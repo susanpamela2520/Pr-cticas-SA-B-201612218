@@ -1,0 +1,100 @@
+openapi: 3.0.3
+info:
+  title: auth-service
+  description: >
+    Servicio de autenticación del sistema de tickets de soporte (adaptado
+    de la Práctica 2). También expone GraphQL en /graphql (ver README).
+  version: "1.0.0"
+servers:
+  - url: http://localhost:8080/api/auth
+    description: A través del API Gateway (recomendado)
+  - url: http://localhost:3001/api/auth
+    description: Directo al servicio (solo para debugging local)
+
+paths:
+  /registro:
+    post:
+      summary: Registrar un nuevo usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nombre, correo, contrasena]
+              properties:
+                nombre: { type: string, example: "Carlos Cliente" }
+                correo: { type: string, format: email }
+                contrasena: { type: string, minLength: 8 }
+                rol: { type: string, enum: [Cliente, Agente, Admin], default: Cliente }
+      responses:
+        "201":
+          description: Usuario creado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsuarioPublico"
+        "400":
+          description: Datos inválidos
+        "409":
+          description: El correo ya está registrado
+
+  /login:
+    post:
+      summary: Iniciar sesión (setea cookie access_token HttpOnly)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [correo, contrasena]
+              properties:
+                correo: { type: string, format: email }
+                contrasena: { type: string }
+      responses:
+        "200":
+          description: Login exitoso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsuarioPublico"
+        "401":
+          description: Correo o contraseña incorrectos
+
+  /me:
+    get:
+      summary: Perfil del usuario autenticado
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Perfil del usuario
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsuarioPublico"
+        "401":
+          description: No autenticado
+
+  /logout:
+    post:
+      summary: Cerrar sesión (limpia la cookie)
+      responses:
+        "204":
+          description: Sesión cerrada
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: access_token
+  schemas:
+    UsuarioPublico:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        nombre: { type: string }
+        correo: { type: string, format: email }
+        rol: { type: string, enum: [Cliente, Agente, Admin] }

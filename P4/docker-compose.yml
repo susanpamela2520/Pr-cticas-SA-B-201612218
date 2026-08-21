@@ -1,0 +1,107 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16
+    container_name: helpdesk_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      # POSTGRES_DB no se define a propósito: 00-init.sql crea las 3
+      # bases de datos explícitamente (auth_db, tickets_db, comentarios_db).
+    ports:
+      - "5434:5432"
+    volumes:
+      - helpdesk_db_data:/var/lib/postgresql/data
+      - ./db-init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  auth-service:
+    build: ./auth-service
+    container_name: helpdesk_auth
+    restart: unless-stopped
+    environment:
+      PORT: 3001
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: auth_db
+      JWT_SECRET: ${JWT_SECRET:-clave-compartida-cambiar-en-produccion}
+      JWT_TTL_SEGUNDOS: 900
+      JWT_RENOVACION_GRACIA_SEGUNDOS: 300
+      AES_KEY_HEX: ${AES_KEY_HEX:-c0f9f1efe5a7ca743ea268e07b01dcff0539e93fb0d901e96401a0c0389423dd}
+      CORREO_HASH_SECRET: ${CORREO_HASH_SECRET:-otro-secreto-para-el-hash-del-correo}
+    ports:
+      - "3001:3001"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  tickets-service:
+    build: ./tickets-service
+    container_name: helpdesk_tickets
+    restart: unless-stopped
+    environment:
+      PORT: 8001
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/tickets_db
+      JWT_SECRET: ${JWT_SECRET:-clave-compartida-cambiar-en-produccion}
+      NOTIFICACIONES_URL: http://notificaciones-service:8002
+    ports:
+      - "8001:8001"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  comentarios-service:
+    build: ./comentarios-service
+    container_name: helpdesk_comentarios
+    restart: unless-stopped
+    environment:
+      PORT: 3002
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: comentarios_db
+      JWT_SECRET: ${JWT_SECRET:-clave-compartida-cambiar-en-produccion}
+    ports:
+      - "3002:3002"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  notificaciones-service:
+    build: ./notificaciones-service
+    container_name: helpdesk_notificaciones
+    restart: unless-stopped
+    environment:
+      PORT: 8002
+    ports:
+      - "8002:8002"
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: helpdesk_gateway
+    restart: unless-stopped
+    environment:
+      PORT: 8080
+      AUTH_SERVICE_URL: http://auth-service:3001
+      TICKETS_SERVICE_URL: http://tickets-service:8001
+      COMENTARIOS_SERVICE_URL: http://comentarios-service:3002
+      NOTIFICACIONES_SERVICE_URL: http://notificaciones-service:8002
+    ports:
+      - "8080:8080"
+    depends_on:
+      - auth-service
+      - tickets-service
+      - comentarios-service
+      - notificaciones-service
+
+volumes:
+  helpdesk_db_data:

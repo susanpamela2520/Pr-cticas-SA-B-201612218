@@ -1,0 +1,93 @@
+openapi: 3.0.3
+info:
+  title: comentarios-service
+  description: Comentarios sobre tickets de soporte.
+  version: "1.0.0"
+servers:
+  - url: http://localhost:8080/api/comentarios
+    description: A través del API Gateway (recomendado)
+  - url: http://localhost:3002/comentarios
+    description: Directo al servicio (solo para debugging local)
+
+paths:
+  /:
+    post:
+      summary: Crear un comentario sobre un ticket
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ticket_id, mensaje]
+              properties:
+                ticket_id: { type: string, format: uuid }
+                mensaje: { type: string, minLength: 1 }
+      responses:
+        "201":
+          description: Comentario creado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comentario"
+        "400":
+          description: Datos inválidos
+        "401":
+          description: No autenticado
+    get:
+      summary: Listar comentarios de un ticket
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: ticket_id
+          in: query
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Lista de comentarios, ordenados por fecha ascendente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Comentario"
+
+  /{id}:
+    get:
+      summary: Obtener un comentario por id
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Comentario encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comentario"
+        "404":
+          description: No existe un comentario con ese id
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: access_token
+  schemas:
+    Comentario:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        ticket_id: { type: string, format: uuid }
+        autor_id: { type: string, format: uuid }
+        autor_rol: { type: string, enum: [Cliente, Agente, Admin] }
+        mensaje: { type: string }
+        creado_en: { type: string, format: date-time }
