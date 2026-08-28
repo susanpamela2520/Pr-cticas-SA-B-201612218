@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "sa-platform.fullname" (dict "root" $ "name" "notificaciones-service") }}
+  labels:
+    {{- include "sa-platform.labels" (dict "root" $ "componente" "notificaciones-service") | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/component: notificaciones-service
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  ports:
+    - port: {{ .Values.containerPort }}
+      targetPort: {{ .Values.containerPort }}

@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "sa-platform.fullname" (dict "root" $ "name" "auth-service") }}
+  labels:
+    {{- include "sa-platform.labels" (dict "root" $ "componente" "auth-service") | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: auth-service
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: auth-service
+        app.kubernetes.io/instance: {{ .Release.Name }}
+      annotations:
+        # Fuerza un reinicio automatico de los pods cuando cambia el
+        # ConfigMap (aunque el nombre del recurso no cambie), porque el
+        # hash del contenido si cambia -> Kubernetes ve una diferencia
+        # en el pod template -> dispara un rollout.
+        checksum/config: {{ include (print $.Template.BasePath "/config.yaml") . | sha256sum }}
+    spec:
+      serviceAccountName: {{ include "sa-platform.fullname" (dict "root" $ "name" "auth-service") }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: auth-service
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            runAsNonRoot: true
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+          ports:
+            - containerPort: {{ .Values.containerPort }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "sa-platform.fullname" (dict "root" $ "name" "auth-service-config") }}
+            - secretRef:
+                name: {{ include "sa-platform.fullname" (dict "root" $ "name" "auth-service-secret") }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+          startupProbe:
+            httpGet: { path: /health, port: {{ .Values.containerPort }} }
+            failureThreshold: {{ .Values.probes.startup.failureThreshold }}
+            periodSeconds: {{ .Values.probes.startup.periodSeconds }}
+          readinessProbe:
+            httpGet: { path: /health, port: {{ .Values.containerPort }} }
+            periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
+            failureThreshold: {{ .Values.probes.readiness.failureThreshold }}
+          livenessProbe:
+            httpGet: { path: /health, port: {{ .Values.containerPort }} }
+            periodSeconds: {{ .Values.probes.liveness.periodSeconds }}
+            failureThreshold: {{ .Values.probes.liveness.failureThreshold }}
+      volumes:
+        - name: tmp
+          emptyDir: {}

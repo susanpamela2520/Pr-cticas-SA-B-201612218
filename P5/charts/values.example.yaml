@@ -1,0 +1,25 @@
+## values.example.yaml
+## Ejemplo de los valores sensibles que el chart necesita, con datos
+## FICTICIOS. Este archivo SÍ se sube al repositorio (a diferencia de
+## un values-secrets.yaml real, que debe quedar fuera de git).
+##
+## Para usarlo de verdad: copia este archivo a values-secrets.yaml,
+## reemplaza los valores ficticios por los tuyos, y agrega
+## "values-secrets.yaml" a tu .gitignore ANTES de generar cualquier
+## valor real (para no arriesgarte a subirlo por accidente).
+##
+## Generar valores propios:
+##   - jwtSecret / correoHashSecret / dbPassword / rabbitmqPassword:
+##       openssl rand -hex 24
+##   - aesKeyHex (debe ser EXACTAMENTE 64 caracteres hex = 32 bytes):
+##       openssl rand -hex 32
+
+global:
+  dbPassword: "ejemplo-cambia-esta-clave-de-bd-12345"
+  rabbitmqPassword: "ejemplo-cambia-esta-clave-del-broker-6789"
+  jwtSecret: "ejemplo-cambia-este-secreto-jwt-largo-y-aleatorio"
+  aesKeyHex: "00112233445566778899aabbccddeeff00112233445566778899aabbccddee"
+  correoHashSecret: "ejemplo-cambia-este-otro-secreto-para-el-hash-del-correo"
+
+cronjobs:
+  carne: "201612218"

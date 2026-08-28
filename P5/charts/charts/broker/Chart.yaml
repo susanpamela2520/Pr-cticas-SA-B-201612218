@@ -1,0 +1,6 @@
+apiVersion: v2
+name: broker
+description: RabbitMQ (con plugin de administracion, usado por el Cronjob 2 via API HTTP)
+type: application
+version: 1.0.0
+appVersion: "3.12"

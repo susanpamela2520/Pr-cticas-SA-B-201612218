@@ -1,0 +1,41 @@
+replicaCount: 2
+
+image:
+  repository: sa-p5/auth-service
+  tag: dev
+  pullPolicy: IfNotPresent
+
+containerPort: 3001
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 300m
+    memory: 256Mi
+
+autoscaling:
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+
+# Justificacion de los valores de probes (documentada tambien en docs/):
+# - startup: hasta 40s para arrancar (arranca rapido, pero se deja margen
+#   por si la base de datos tarda en aceptar conexiones).
+# - readiness: cada 5s: si se satura, se saca del Service rapido.
+# - liveness: cada 10s, mas tolerante, para no reiniciar por una lentitud
+#   momentanea que la readiness ya esta manejando sacandolo del trafico.
+probes:
+  startup:
+    failureThreshold: 20
+    periodSeconds: 2
+  readiness:
+    periodSeconds: 5
+    failureThreshold: 3
+  liveness:
+    periodSeconds: 10
+    failureThreshold: 3
+
+podDisruptionBudget:
+  minAvailable: 1

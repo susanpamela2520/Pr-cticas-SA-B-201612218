@@ -1,0 +1,25 @@
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "sa-platform.fullname" (dict "root" $ "name" "api-gateway") }}
+  labels:
+    {{- include "sa-platform.labels" (dict "root" $ "componente" "api-gateway") | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ .Values.ingress.className | default "nginx" }}
+  rules:
+    - host: {{ .Values.ingress.host | required "api-gateway.values.ingress.host es obligatorio" }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "sa-platform.fullname" (dict "root" $ "name" "api-gateway") }}
+                port:
+                  number: {{ .Values.containerPort }}
+{{- end }}

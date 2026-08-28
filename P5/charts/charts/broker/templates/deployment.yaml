@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "sa-platform.fullname" (dict "root" $ "name" "broker") }}
+  labels:
+    {{- include "sa-platform.labels" (dict "root" $ "componente" "broker") | nindent 4 }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate # es un solo broker sin cluster - evita 2 instancias compitiendo por el mismo estado
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: rabbitmq
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: rabbitmq
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: broker
+    spec:
+      serviceAccountName: {{ include "sa-platform.fullname" (dict "root" $ "name" "broker") }}
+      securityContext:
+        fsGroup: 999
+      containers:
+        - name: rabbitmq
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 999
+            readOnlyRootFilesystem: false # rabbitmq necesita escribir su propio directorio de datos
+            allowPrivilegeEscalation: false
+          envFrom:
+            - secretRef:
+                name: {{ include "sa-platform.fullname" (dict "root" $ "name" "broker-credenciales") }}
+          ports:
+            - containerPort: 5672
+              name: amqp
+            - containerPort: 15672
+              name: management
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          readinessProbe:
+            tcpSocket:
+              port: 5672
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 5672
+            initialDelaySeconds: 30
+            periodSeconds: 15

@@ -1,0 +1,6 @@
+apiVersion: v2
+name: comentarios-service
+description: Comentarios sobre tickets (Node.js/TypeScript)
+type: application
+version: 1.0.0
+appVersion: "1.0.0"

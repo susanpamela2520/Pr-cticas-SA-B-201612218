@@ -1,20 +1,6 @@
 import express, { Application } from 'express';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 
-/**
- * El Gateway es deliberadamente "tonto": solo enruta. No valida JWT,
- * no toca cookies, no parsea el body — por eso NO se usa
- * express.json() aquí. Si se parseara el body antes de proxear, el
- * middleware de proxy tendría que volver a serializarlo, y es una
- * fuente común de bugs (content-length desincronizado, streams ya
- * consumidos). Cada microservicio destino valida su propia sesión
- * (ver verificarToken en auth-service, tickets-service y
- * comentarios-service) — el Gateway no duplica esa lógica.
- *
- * Las cookies (incluida la del JWT) viajan automáticamente a través
- * del proxy sin configuración extra: http-proxy-middleware reenvía
- * los headers Cookie / Set-Cookie tal cual.
- */
 export function crearApp(): Application {
   const app = express();
 

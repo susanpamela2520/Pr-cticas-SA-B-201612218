@@ -1,0 +1,118 @@
+{{/*
+Estrategia de NetworkPolicies (requisito E):
+1) Deny-all de ingreso por defecto para todo el namespace - nadie puede
+   hablarle a nadie a menos que exista una regla explícita que lo permita.
+2) api-gateway: puede recibir tráfico solo del Ingress Controller.
+3) Los 4 microservicios: pueden recibir tráfico solo de api-gateway.
+4) PostgreSQL: puede recibir tráfico solo de auth-service, tickets-service
+   y comentarios-service (los que tienen base de datos).
+5) RabbitMQ: puede recibir tráfico solo de tickets-service y
+   notificaciones-service (los que publican/consumen mensajes).
+
+Nota: solo se restringe INGRESO (ingress). El egreso se deja sin
+restringir para no tener que whitelistear DNS (kube-dns) por separado
+en cada policy — el foco de esta práctica es demostrar que el tráfico
+lateral NO autorizado es rechazado, no un aislamiento total de egress.
+*/}}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  labels:
+    {{- include "sa-platform.labels" (dict "root" $ "componente" "network-policy") | nindent 4 }}
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-to-gateway
+  labels:
+    {{- include "sa-platform.labels" (dict "root" $ "componente" "network-policy") | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: api-gateway
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        # Permite el Ingress Controller (normalmente vive en su propio
+        # namespace, ej. ingress-nginx). Se deja abierto a "cualquier
+        # namespace" para no acoplar el chart al nombre exacto del
+        # namespace del Ingress Controller, que varía según cómo se
+        # instaló (minikube addon vs. instalación manual).
+        - namespaceSelector: {}
+      ports:
+        - port: 8080
+          protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-gateway-to-services
+  labels:
+    {{- include "sa-platform.labels" (dict "root" $ "componente" "network-policy") | nindent 4 }}
+spec:
+  podSelector:
+    matchExpressions:
+      - key: app.kubernetes.io/component
+        operator: In
+        values: [auth-service, tickets-service, comentarios-service, notificaciones-service]
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: api-gateway
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-services-to-postgresql
+  labels:
+    {{- include "sa-platform.labels" (dict "root" $ "componente" "network-policy") | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: postgresql
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/component
+                operator: In
+                values: [auth-service, tickets-service, comentarios-service, cronjob-registro, cronjob-resumen]
+      ports:
+        - port: 5432
+          protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-services-to-rabbitmq
+  labels:
+    {{- include "sa-platform.labels" (dict "root" $ "componente" "network-policy") | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: rabbitmq
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/component
+                operator: In
+                values: [tickets-service, notificaciones-service, cronjob-resumen]
+      ports:
+        - port: 5672
+          protocol: TCP
+        - port: 15672
+          protocol: TCP

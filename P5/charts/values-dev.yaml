@@ -1,0 +1,46 @@
+## Ambiente de desarrollo: réplicas mínimas, recursos chicos, logs
+## detallados, imagen con tag "dev" (la que se construye localmente).
+## Uso: helm install sa-platform ./charts -f values.yaml -f values-dev.yaml -f values-secrets.yaml -n sa-p5 --create-namespace
+
+global:
+  logLevel: debug
+
+auth-service:
+  replicaCount: 1
+  image:
+    tag: dev
+  resources:
+    requests: { cpu: 50m, memory: 64Mi }
+    limits: { cpu: 150m, memory: 128Mi }
+
+tickets-service:
+  replicaCount: 1
+  image:
+    tag: dev
+  resources:
+    requests: { cpu: 75m, memory: 96Mi }
+    limits: { cpu: 200m, memory: 192Mi }
+
+comentarios-service:
+  replicaCount: 1
+  image:
+    tag: dev
+  resources:
+    requests: { cpu: 50m, memory: 64Mi }
+    limits: { cpu: 150m, memory: 128Mi }
+
+notificaciones-service:
+  replicaCount: 1
+  image:
+    tag: dev
+  resources:
+    requests: { cpu: 50m, memory: 64Mi }
+    limits: { cpu: 150m, memory: 128Mi }
+
+api-gateway:
+  replicaCount: 1
+  image:
+    tag: dev
+  resources:
+    requests: { cpu: 50m, memory: 64Mi }
+    limits: { cpu: 150m, memory: 128Mi }

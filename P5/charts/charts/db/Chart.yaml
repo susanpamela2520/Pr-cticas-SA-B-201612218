@@ -1,0 +1,6 @@
+apiVersion: v2
+name: db
+description: PostgreSQL como StatefulSet con PVC y headless service
+type: application
+version: 1.0.0
+appVersion: "16"

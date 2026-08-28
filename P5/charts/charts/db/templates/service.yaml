@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "sa-platform.fullname" (dict "root" $ "name" "db-headless") }}
+  labels:
+    {{- include "sa-platform.labels" (dict "root" $ "componente" "db") | nindent 4 }}
+spec:
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  ports:
+    - port: 5432
+      targetPort: 5432
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "sa-platform.fullname" (dict "root" $ "name" "db") }}
+  labels:
+    {{- include "sa-platform.labels" (dict "root" $ "componente" "db") | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  ports:
+    - port: 5432
+      targetPort: 5432

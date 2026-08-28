@@ -1,0 +1,15 @@
+sa-platform instalado como release "{{ .Release.Name }}" en el namespace "{{ .Release.Namespace }}".
+
+Para acceder al sistema (Ingress -> api-gateway):
+  1. Agrega esta linea a tu archivo hosts si aun no lo has hecho:
+       $(minikube ip)  {{ (index .Values "api-gateway" "ingress" "host") | default "sa-p5.local" }}
+     (en Linux/Mac: /etc/hosts — en Windows: C:\Windows\System32\drivers\etc\hosts)
+
+  2. Prueba:
+       curl http://{{ (index .Values "api-gateway" "ingress" "host") | default "sa-p5.local" }}/health
+
+Comandos utiles:
+  kubectl get pods -n {{ .Release.Namespace }} -w
+  kubectl get hpa -n {{ .Release.Namespace }} -w
+  helm history {{ .Release.Name }} -n {{ .Release.Namespace }}
+  kubectl logs -n {{ .Release.Namespace }} -l app.kubernetes.io/component=tickets-service -f

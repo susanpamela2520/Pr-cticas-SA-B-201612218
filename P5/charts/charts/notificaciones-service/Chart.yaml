@@ -1,0 +1,6 @@
+apiVersion: v2
+name: notificaciones-service
+description: Consumidor de notificaciones via RabbitMQ (Python/FastAPI, sin BD)
+type: application
+version: 1.0.0
+appVersion: "1.0.0"

@@ -1,0 +1,112 @@
+## values.yaml — valores base, compartidos por todos los ambientes.
+## Los archivos values-dev.yaml / values-prod.yaml SOBRESCRIBEN partes de
+## este archivo (réplicas, recursos, tag de imagen, nivel de log).
+## Ninguna credencial real vive aquí — todos los campos sensibles usan
+## `required` en las plantillas, así que si no se les da un valor real
+## (via un values-secrets.yaml local, NO versionado), `helm install`
+## falla con un mensaje claro en vez de desplegar con una clave vacía.
+
+global:
+  # --- Base de datos (subchart "db") ---
+  dbName: sa_platform_db
+  dbUsername: appuser
+  dbPassword: "" # <- ver values.example.yaml y docs/02-comandos-reproducibles.md
+
+  # --- Broker (subchart "broker") ---
+  rabbitmqUsername: appuser
+  rabbitmqPassword: "" # <- idem
+  rabbitmqQueueTicketsResueltos: tickets.resueltos
+  rabbitmqQueueResumenesCron: cron.resumenes
+
+  # --- JWT / cifrado (compartidos por auth-service, tickets-service, comentarios-service) ---
+  jwtSecret: "" # <- idem
+  jwtTtlSegundos: 900
+  jwtRenovacionGraciaSegundos: 300
+  aesKeyHex: "" # <- 64 caracteres hex (32 bytes) - ver values.example.yaml
+  correoHashSecret: "" # <- idem
+
+  logLevel: info
+
+# --- Base de datos: StatefulSet propio (ver docs/04 para la nota sobre Bitnami) ---
+db:
+  image:
+    repository: postgres
+    tag: "16-alpine"
+  storage:
+    size: 1Gi
+    storageClassName: standard
+  resources:
+    requests: { cpu: 100m, memory: 128Mi }
+    limits: { cpu: 500m, memory: 512Mi }
+
+broker:
+  image:
+    repository: rabbitmq
+    tag: "3-management-alpine"
+  resources:
+    requests: { cpu: 100m, memory: 256Mi }
+    limits: { cpu: 500m, memory: 512Mi }
+
+cronjobs:
+  carne: "CAMBIAR-POR-TU-NUMERO-DE-CARNE"
+  image:
+    repository: sa-p5/cronjobs
+    tag: dev
+
+resourceQuota:
+  requestsCpu: "2"
+  requestsMemory: "2Gi"
+  limitsCpu: "4"
+  limitsMemory: "4Gi"
+  maxPods: "30"
+
+limitRange:
+  defaultCpu: "250m"
+  defaultMemory: "256Mi"
+  defaultRequestCpu: "100m"
+  defaultRequestMemory: "128Mi"
+  maxCpu: "1"
+  maxMemory: "512Mi"
+
+# --- Dependencia Bitnami real (declarada para cumplir el requerimiento,
+# deshabilitada por defecto - ver docs/04-tecnologias-y-decisiones.md) ---
+postgresql:
+  enabled: false
+rabbitmq:
+  enabled: false
+
+# --- Valores por subchart de servicio (nombres deben coincidir con el
+# `name:` de cada Chart.yaml en charts/charts/) ---
+auth-service:
+  replicaCount: 2
+  image:
+    repository: sa-p5/auth-service
+    tag: dev
+
+tickets-service:
+  replicaCount: 2
+  image:
+    repository: sa-p5/tickets-service
+    tag: dev
+
+comentarios-service:
+  replicaCount: 2
+  image:
+    repository: sa-p5/comentarios-service
+    tag: dev
+
+notificaciones-service:
+  replicaCount: 2
+  image:
+    repository: sa-p5/notificaciones-service
+    tag: dev
+
+api-gateway:
+  replicaCount: 2
+  image:
+    repository: sa-p5/api-gateway
+    tag: dev
+  ingress:
+    enabled: true
+    className: nginx
+    host: sa-p5.local

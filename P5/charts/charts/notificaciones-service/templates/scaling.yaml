@@ -1,0 +1,33 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "sa-platform.fullname" (dict "root" $ "name" "notificaciones-service") }}
+  labels:
+    {{- include "sa-platform.labels" (dict "root" $ "componente" "notificaciones-service") | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "sa-platform.fullname" (dict "root" $ "name" "notificaciones-service") }}
+  minReplicas: {{ .Values.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.autoscaling.maxReplicas }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.autoscaling.targetCPUUtilizationPercentage }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "sa-platform.fullname" (dict "root" $ "name" "notificaciones-service") }}
+  labels:
+    {{- include "sa-platform.labels" (dict "root" $ "componente" "notificaciones-service") | nindent 4 }}
+spec:
+  minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: notificaciones-service
+      app.kubernetes.io/instance: {{ .Release.Name }}

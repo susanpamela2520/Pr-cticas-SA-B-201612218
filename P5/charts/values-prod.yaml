@@ -1,0 +1,47 @@
+## Ambiente de "producción" (simulado, sigue siendo el mismo clúster
+## local): más réplicas base, más recursos, logs solo de advertencias
+## en adelante, imagen con tag "prod".
+## Uso: helm install sa-platform ./charts -f values.yaml -f values-prod.yaml -f values-secrets.yaml -n sa-p5 --create-namespace
+
+global:
+  logLevel: warn
+
+auth-service:
+  replicaCount: 3
+  image:
+    tag: prod
+  resources:
+    requests: { cpu: 200m, memory: 256Mi }
+    limits: { cpu: 500m, memory: 512Mi }
+
+tickets-service:
+  replicaCount: 3
+  image:
+    tag: prod
+  resources:
+    requests: { cpu: 250m, memory: 320Mi }
+    limits: { cpu: 600m, memory: 640Mi }
+
+comentarios-service:
+  replicaCount: 3
+  image:
+    tag: prod
+  resources:
+    requests: { cpu: 200m, memory: 256Mi }
+    limits: { cpu: 500m, memory: 512Mi }
+
+notificaciones-service:
+  replicaCount: 3
+  image:
+    tag: prod
+  resources:
+    requests: { cpu: 200m, memory: 256Mi }
+    limits: { cpu: 500m, memory: 512Mi }
+
+api-gateway:
+  replicaCount: 3
+  image:
+    tag: prod
+  resources:
+    requests: { cpu: 200m, memory: 256Mi }
+    limits: { cpu: 500m, memory: 512Mi }
