@@ -1,4 +1,4 @@
-apiVersion: apps/v1
+﻿apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ include "sa-platform.fullname" (dict "root" $ "name" "db") }}
@@ -27,7 +27,7 @@ spec:
           securityContext:
             runAsNonRoot: true
             runAsUser: 999
-            readOnlyRootFilesystem: false # postgres necesita escribir en su propio PGDATA
+            readOnlyRootFilesystem: false
             allowPrivilegeEscalation: false
           envFrom:
             - secretRef:
@@ -45,12 +45,12 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           readinessProbe:
             exec:
-              command: ["pg_isready", "-U", "$(POSTGRES_USER)"]
+              command: ["pg_isready", "-U", "{{ .Values.global.dbUsername }}"]
             initialDelaySeconds: 5
             periodSeconds: 5
           livenessProbe:
             exec:
-              command: ["pg_isready", "-U", "$(POSTGRES_USER)"]
+              command: ["pg_isready", "-U", "{{ .Values.global.dbUsername }}"]
             initialDelaySeconds: 15
             periodSeconds: 10
   volumeClaimTemplates:

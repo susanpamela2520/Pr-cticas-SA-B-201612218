@@ -1,10 +1,5 @@
 # Evidencias Requeridas — Comandos Exactos
 
-Ejecuta esto DESPUÉS de que el sistema ya esté arriba (paso 6 de
-`02-comandos-reproducibles.md`). Guarda la salida de cada comando
-(captura de pantalla o copia el texto) — eso es la evidencia.
-
----
 
 ## 1. `helm history` con upgrade y rollback
 

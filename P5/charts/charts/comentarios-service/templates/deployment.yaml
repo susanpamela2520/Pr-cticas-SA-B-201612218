@@ -5,7 +5,6 @@ metadata:
   labels:
     {{- include "sa-platform.labels" (dict "root" $ "componente" "comentarios-service") | nindent 4 }}
 spec:
-  replicas: {{ .Values.replicaCount }}
   strategy:
     type: RollingUpdate
     rollingUpdate:

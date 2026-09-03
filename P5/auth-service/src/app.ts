@@ -77,7 +77,7 @@ function verificarConRenovacion(token: string): { payload: any; nuevoToken?: str
   }
 }
 function opcionesCookie(maxAgeMs: number) {
-  return { httpOnly: true, sameSite: 'lax' as const, secure: process.env.NODE_ENV === 'production', maxAge: maxAgeMs, path: '/' };
+  return { httpOnly: true, sameSite: 'lax' as const, secure: process.env.COOKIE_SECURE === 'true', maxAge: maxAgeMs, path: '/' };
 }
 
 declare global {

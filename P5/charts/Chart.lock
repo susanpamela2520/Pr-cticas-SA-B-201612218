@@ -1,0 +1,30 @@
+dependencies:
+- name: db
+  repository: ""
+  version: 1.0.0
+- name: broker
+  repository: ""
+  version: 1.0.0
+- name: auth-service
+  repository: ""
+  version: 1.0.0
+- name: tickets-service
+  repository: ""
+  version: 1.0.0
+- name: comentarios-service
+  repository: ""
+  version: 1.0.0
+- name: notificaciones-service
+  repository: ""
+  version: 1.0.0
+- name: api-gateway
+  repository: ""
+  version: 1.0.0
+- name: postgresql
+  repository: oci://registry-1.docker.io/bitnamicharts
+  version: 15.5.20
+- name: rabbitmq
+  repository: oci://registry-1.docker.io/bitnamicharts
+  version: 14.6.6
+digest: sha256:4f4cdc51c39932e5c1bc44f396c08ebb3bba893ff468d54ec1a87052362c12d7
+generated: "2026-08-28T10:17:14.8578168-06:00"

@@ -12,6 +12,7 @@ data:
   JWT_TTL_SEGUNDOS: {{ .Values.global.jwtTtlSegundos | default 900 | quote }}
   JWT_RENOVACION_GRACIA_SEGUNDOS: {{ .Values.global.jwtRenovacionGraciaSegundos | default 300 | quote }}
   LOG_LEVEL: {{ .Values.global.logLevel | default "info" | quote }}
+  COOKIE_SECURE: "false"
 ---
 apiVersion: v1
 kind: Secret

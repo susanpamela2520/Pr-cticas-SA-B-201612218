@@ -8,6 +8,7 @@ const tasaError = new Rate('tasa_error_custom');
 const latenciaLogin = new Trend('latencia_login');
 
 const GATEWAY = __ENV.GATEWAY_URL || 'http://localhost:8080';
+const HEADERS_HOST = { Host: __ENV.INGRESS_HOST || 'sa-p5.local' };
 
 // Concurrencia creciente por etapas, para poder ver en vivo (con
 // `kubectl get hpa -w` en otra terminal) cómo el HPA escala hacia
@@ -33,31 +34,28 @@ function correoUnico() {
 }
 
 export default function () {
-  // 1. Registro (solo una vez por VU sería lo ideal, pero para simplicidad
-  //    del script se acepta el 409 de "correo ya registrado" en iteraciones
-  //    repetidas del mismo VU y se continúa igual).
+  const correo = correoUnico();
+
   http.post(
     `${GATEWAY}/api/auth/registro`,
-    JSON.stringify({ nombre: 'Carga', correo: correoUnico(), contrasena: 'clave1234', rol: 'Cliente' }),
-    { headers: { 'Content-Type': 'application/json' } }
+    JSON.stringify({ nombre: 'Carga', correo: correo, contrasena: 'clave1234', rol: 'Cliente' }),
+    { headers: { 'Content-Type': 'application/json', ...HEADERS_HOST } }
   );
 
-  // 2. Login (esta es la petición que más nos interesa medir: toca
-  //    auth-service, cifrado AES y la base de datos).
   const inicio = Date.now();
   const resLogin = http.post(
     `${GATEWAY}/api/auth/login`,
-    JSON.stringify({ correo: correoUnico(), contrasena: 'clave1234' }),
-    { headers: { 'Content-Type': 'application/json' } }
+    JSON.stringify({ correo: correo, contrasena: 'clave1234' }),
+    { headers: { 'Content-Type': 'application/json', ...HEADERS_HOST } }
   );
   latenciaLogin.add(Date.now() - inicio);
 
   const cookies = resLogin.cookies;
   const cookieHeader = cookies && cookies.access_token ? `access_token=${cookies.access_token[0].value}` : '';
 
-  // 3. Listar tickets (toca tickets-service, el candidato principal a
-  //    escalar bajo carga en esta prueba).
-  const resTickets = http.get(`${GATEWAY}/api/tickets`, { headers: { Cookie: cookieHeader } });
+  const resTickets = http.get(`${GATEWAY}/api/tickets`, {
+    headers: { Cookie: cookieHeader, ...HEADERS_HOST },
+  });
 
   const ok = check(resTickets, {
     'status es 200 o 401': (r) => r.status === 200 || r.status === 401,

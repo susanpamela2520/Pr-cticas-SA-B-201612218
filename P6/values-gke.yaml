@@ -1,0 +1,79 @@
+## values-gke.yaml
+## Ajustes especificos para desplegar en GKE en vez del cluster local
+## de la P5. Uso:
+##   helm install sa-platform . -f values.yaml -f values-gke.yaml -f values-secrets.yaml -n sa-p5 --create-namespace
+##
+## Antes de usarlo: reemplaza TU_REGION y TU_PROJECT_ID por los tuyos
+## reales en TODAS las lineas "repository:" de abajo (ver
+## docs/01-comandos-gke.md paso 3 para obtenerlos). Ejemplo de como
+## debe quedar una linea ya reemplazada:
+##   us-central1-docker.pkg.dev/mi-proyecto-123456/sa-p5-repo/auth-service
+
+# --- Base de datos: StorageClass del proveedor ---
+# "standard-rwo" es la StorageClass por defecto en clusters GKE
+# Standard modernos (disco persistente de Compute Engine). Verifica la
+# tuya con: kubectl get storageclass
+# Si tu cluster muestra otro nombre (ej. "standard" a secas en
+# clusters mas viejos), cambia el valor de abajo para que coincida.
+db:
+  storage:
+    storageClassName: standard-rwo
+    size: 2Gi
+  image:
+    repository: postgres
+    tag: "16-alpine"
+
+broker:
+  image:
+    repository: rabbitmq
+    tag: "3-management-alpine"
+
+cronjobs:
+  image:
+    repository: TU_REGION-docker.pkg.dev/TU_PROJECT_ID/sa-p5-repo/cronjobs
+    tag: gke
+
+auth-service:
+  replicaCount: 2
+  image:
+    repository: TU_REGION-docker.pkg.dev/TU_PROJECT_ID/sa-p5-repo/auth-service
+    tag: gke
+
+tickets-service:
+  replicaCount: 2
+  image:
+    repository: TU_REGION-docker.pkg.dev/TU_PROJECT_ID/sa-p5-repo/tickets-service
+    tag: gke
+
+comentarios-service:
+  replicaCount: 2
+  image:
+    repository: TU_REGION-docker.pkg.dev/TU_PROJECT_ID/sa-p5-repo/comentarios-service
+    tag: gke
+
+notificaciones-service:
+  replicaCount: 2
+  image:
+    repository: TU_REGION-docker.pkg.dev/TU_PROJECT_ID/sa-p5-repo/notificaciones-service
+    tag: gke
+
+# --- Exposicion publica: LoadBalancer real en vez de Ingress local ---
+# GKE provisiona automaticamente una IP publica real cuando el Service
+# es de tipo LoadBalancer - no hace falta instalar un Ingress Controller.
+api-gateway:
+  replicaCount: 2
+  image:
+    repository: TU_REGION-docker.pkg.dev/TU_PROJECT_ID/sa-p5-repo/api-gateway
+    tag: gke
+  service:
+    type: LoadBalancer
+  ingress:
+    enabled: false
+
+global:
+  logLevel: info
+  # En la nube, sin certificado TLS propio, seguimos sirviendo por
+  # HTTP simple (igual que en la P5 local) - por eso la cookie sigue
+  # sin el atributo Secure. Si en algun momento agregas HTTPS real,
+  # cambia esto a "true".
+  cookieSecure: "false"
