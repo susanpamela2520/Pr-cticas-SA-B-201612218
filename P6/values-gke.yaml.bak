@@ -3,11 +3,11 @@
 ## de la P5. Uso:
 ##   helm install sa-platform . -f values.yaml -f values-gke.yaml -f values-secrets.yaml -n sa-p5 --create-namespace
 ##
-## Antes de usarlo: reemplaza us-central1 y p6-sa2s2026 por los tuyos
+## Antes de usarlo: reemplaza TU_REGION y TU_PROJECT_ID por los tuyos
 ## reales en TODAS las lineas "repository:" de abajo (ver
 ## docs/01-comandos-gke.md paso 3 para obtenerlos). Ejemplo de como
 ## debe quedar una linea ya reemplazada:
-##   us-central1-docker.pkg.dev/mi-proyecto-123456/sa-p6/auth-service
+##   us-central1-docker.pkg.dev/mi-proyecto-123456/sa-p5-repo/auth-service
 
 # --- Base de datos: StorageClass del proveedor ---
 # "standard-rwo" es la StorageClass por defecto en clusters GKE
@@ -30,31 +30,31 @@ broker:
 
 cronjobs:
   image:
-    repository: us-central1-docker.pkg.dev/p6-sa2s2026/sa-p6/cronjobs
+    repository: TU_REGION-docker.pkg.dev/TU_PROJECT_ID/sa-p5-repo/cronjobs
     tag: gke
 
 auth-service:
   replicaCount: 2
   image:
-    repository: us-central1-docker.pkg.dev/p6-sa2s2026/sa-p6/auth-service
+    repository: TU_REGION-docker.pkg.dev/TU_PROJECT_ID/sa-p5-repo/auth-service
     tag: gke
 
 tickets-service:
   replicaCount: 2
   image:
-    repository: us-central1-docker.pkg.dev/p6-sa2s2026/sa-p6/tickets-service
+    repository: TU_REGION-docker.pkg.dev/TU_PROJECT_ID/sa-p5-repo/tickets-service
     tag: gke
 
 comentarios-service:
   replicaCount: 2
   image:
-    repository: us-central1-docker.pkg.dev/p6-sa2s2026/sa-p6/comentarios-service
+    repository: TU_REGION-docker.pkg.dev/TU_PROJECT_ID/sa-p5-repo/comentarios-service
     tag: gke
 
 notificaciones-service:
   replicaCount: 2
   image:
-    repository: us-central1-docker.pkg.dev/p6-sa2s2026/sa-p6/notificaciones-service
+    repository: TU_REGION-docker.pkg.dev/TU_PROJECT_ID/sa-p5-repo/notificaciones-service
     tag: gke
 
 # --- Exposicion publica: LoadBalancer real en vez de Ingress local ---
@@ -63,7 +63,7 @@ notificaciones-service:
 api-gateway:
   replicaCount: 2
   image:
-    repository: us-central1-docker.pkg.dev/p6-sa2s2026/sa-p6/api-gateway
+    repository: TU_REGION-docker.pkg.dev/TU_PROJECT_ID/sa-p5-repo/api-gateway
     tag: gke
   service:
     type: LoadBalancer
@@ -77,15 +77,3 @@ global:
   # sin el atributo Secure. Si en algun momento agregas HTTPS real,
   # cambia esto a "true".
   cookieSecure: "false"
-
-# --- Cuota ampliada para la nube ---
-# El clúster de GKE (3 nodos e2-standard-2) tiene mas capacidad que
-# minikube, y el HPA necesita margen para escalar durante la prueba
-# de carga. Con limitsCpu "4" el namespace quedaba al 97% y los pods
-# nuevos del HPA serian rechazados por cuota, no por falta de nodos.
-resourceQuota:
-  requestsCpu: "4"
-  requestsMemory: "4Gi"
-  limitsCpu: "8"
-  limitsMemory: "8Gi"
-  maxPods: "40"

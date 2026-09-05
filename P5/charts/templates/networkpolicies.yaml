@@ -39,12 +39,9 @@ spec:
     - Ingress
   ingress:
     - from:
-        # Permite el Ingress Controller (normalmente vive en su propio
-        # namespace, ej. ingress-nginx). Se deja abierto a "cualquier
-        # namespace" para no acoplar el chart al nombre exacto del
-        # namespace del Ingress Controller, que varía según cómo se
-        # instaló (minikube addon vs. instalación manual).
         - namespaceSelector: {}
+        - ipBlock:
+            cidr: 0.0.0.0/0
       ports:
         - port: 8080
           protocol: TCP

@@ -1,1 +1,1 @@
-﻿{"titulo":"Prueba de despliegue","descripcion":"Verificando que todo el sistema en Kubernetes funciona","prioridad":"ALTA"}
+{"titulo":"Prueba desde la nube","descripcion":"Ticket creado contra el LoadBalancer publico de GKE","prioridad":"ALTA"}
