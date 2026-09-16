@@ -1,0 +1,364 @@
+name: CI/CD Plataforma de Tickets
+
+# ---------------------------------------------------------------------------
+# Disparadores (criterio "Versionamiento" de la rubrica)
+#
+#   Pull Request  -> solo valida: pruebas + chart. No publica ni despliega.
+#   Push a main   -> ciclo completo: valida, publica en GHCR y despliega a GKE.
+#   Tag vX.Y.Z    -> igual que main, pero ademas etiqueta las imagenes con la
+#                    version semantica (release inmutable).
+#   Manual        -> permite relanzar el flujo desde la interfaz de Actions.
+# ---------------------------------------------------------------------------
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*.*.*'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  REGISTRO: ghcr.io
+  NAMESPACE: sa-p5
+  RELEASE: sa-platform
+  CLUSTER: sa-p6-cluster
+  ZONA: us-central1-a
+
+# El token efimero de Actions necesita permiso de escritura sobre packages
+# para poder publicar en GHCR. No se configura ningun secreto para esto.
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+
+  # =========================================================================
+  # ETAPA 1 - BUILD Y PRUEBAS UNITARIAS
+  # Se ejecuta un job independiente por microservicio, en paralelo.
+  # =========================================================================
+  pruebas:
+    name: "1. Build y pruebas (${{ matrix.servicio }})"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        servicio:
+          - auth-service
+          - tickets-service
+          - comentarios-service
+          - notificaciones-service
+          - api-gateway
+          - cronjobs
+
+    steps:
+      - name: Descargar el codigo
+        uses: actions/checkout@v4
+
+      - name: Detectar el lenguaje del servicio
+        id: detectar
+        working-directory: P5/${{ matrix.servicio }}
+        run: |
+          if [ -f package.json ]; then
+            echo "lenguaje=node" >> "$GITHUB_OUTPUT"
+          elif [ -f requirements.txt ] || [ -f pyproject.toml ]; then
+            echo "lenguaje=python" >> "$GITHUB_OUTPUT"
+          else
+            echo "lenguaje=ninguno" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Preparar Node.js
+        if: steps.detectar.outputs.lenguaje == 'node'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Preparar Python
+        if: steps.detectar.outputs.lenguaje == 'python'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # --- BUILD: instalar dependencias y compilar -------------------------
+      - name: Instalar dependencias y compilar (Node)
+        if: steps.detectar.outputs.lenguaje == 'node'
+        working-directory: P5/${{ matrix.servicio }}
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+          npm run build --if-present
+
+      - name: Instalar dependencias (Python)
+        if: steps.detectar.outputs.lenguaje == 'python'
+        working-directory: P5/${{ matrix.servicio }}
+        run: |
+          python -m pip install --upgrade pip
+          [ -f requirements.txt ] && pip install -r requirements.txt
+          pip install pytest
+
+      # --- TEST: ejecutar las pruebas del servicio -------------------------
+      - name: Ejecutar pruebas (Node)
+        if: steps.detectar.outputs.lenguaje == 'node'
+        working-directory: P5/${{ matrix.servicio }}
+        run: npm run test --if-present
+
+      - name: Ejecutar pruebas (Python)
+        if: steps.detectar.outputs.lenguaje == 'python'
+        working-directory: P5/${{ matrix.servicio }}
+        run: |
+          if [ -d tests ] || ls test_*.py >/dev/null 2>&1; then
+            pytest -v
+          else
+            echo "El servicio no declara pruebas propias."
+          fi
+
+      # --- Validacion estatica del Dockerfile ------------------------------
+      - name: Verificar que el Dockerfile compila
+        working-directory: P5/${{ matrix.servicio }}
+        run: docker build -t validacion-local:${{ matrix.servicio }} .
+
+  # =========================================================================
+  # ETAPA 2 - PRUEBAS DE CONTRATO SOBRE LOS MANIFIESTOS
+  # Renderiza el chart de Helm y valida el resultado con pytest.
+  # Detecta errores de configuracion antes de que lleguen al cluster.
+  # =========================================================================
+  validar-chart:
+    name: "2. Validacion del chart de Helm"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar el codigo
+        uses: actions/checkout@v4
+
+      - name: Instalar Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: 'v3.16.2'
+
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Instalar dependencias de las pruebas
+        run: pip install pytest pyyaml
+
+      - name: Resolver subcharts
+        working-directory: P5/charts
+        run: helm dependency update
+
+      - name: Analisis estatico del chart
+        working-directory: P5/charts
+        run: helm lint . -f values.yaml -f ../../P7/values-ci.yaml
+
+      - name: Renderizar los manifiestos
+        working-directory: P5/charts
+        run: |
+          helm template ${{ env.RELEASE }} . \
+            -f values.yaml \
+            -f ../../P6/values-gke.yaml \
+            -f ../../P7/values-ci.yaml \
+            -n ${{ env.NAMESPACE }} \
+            > /tmp/manifiestos.yaml
+          wc -l /tmp/manifiestos.yaml
+
+      - name: Ejecutar las pruebas de contrato
+        env:
+          MANIFIESTOS: /tmp/manifiestos.yaml
+        run: pytest P7/tests -v
+
+      - name: Guardar los manifiestos como artefacto
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: manifiestos-renderizados
+          path: /tmp/manifiestos.yaml
+          retention-days: 7
+
+  # =========================================================================
+  # ETAPA 3 - DOCKERIZACION Y PUBLICACION EN GHCR
+  # No corre en Pull Requests: solo se publica lo que ya paso a main o a tag.
+  # =========================================================================
+  publicar:
+    name: "3. Publicar imagen (${{ matrix.servicio }})"
+    runs-on: ubuntu-latest
+    needs: [pruebas, validar-chart]
+    if: github.event_name != 'pull_request'
+    strategy:
+      fail-fast: false
+      matrix:
+        servicio:
+          - auth-service
+          - tickets-service
+          - comentarios-service
+          - notificaciones-service
+          - api-gateway
+          - cronjobs
+
+    steps:
+      - name: Descargar el codigo
+        uses: actions/checkout@v4
+
+      # GHCR exige rutas en minusculas y el nombre del repositorio contiene
+      # mayusculas, por lo que hay que normalizarlo antes de usarlo.
+      - name: Normalizar la ruta del repositorio
+        id: repo
+        run: echo "ruta=${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+
+      - name: Configurar Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Autenticarse en GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRO }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Calcular etiquetas y metadatos
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRO }}/${{ steps.repo.outputs.ruta }}/${{ matrix.servicio }}
+          tags: |
+            type=sha,format=short
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Construir y publicar
+        uses: docker/build-push-action@v6
+        with:
+          context: P5/${{ matrix.servicio }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=${{ matrix.servicio }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.servicio }}
+
+  # =========================================================================
+  # ETAPA 4 - DESPLIEGUE AUTOMATICO AL CLUSTER DE GKE
+  # =========================================================================
+  desplegar:
+    name: "4. Desplegar en GKE"
+    runs-on: ubuntu-latest
+    needs: publicar
+    if: github.event_name != 'pull_request'
+    environment:
+      name: produccion
+      url: http://${{ steps.ip.outputs.direccion }}:8080/health
+
+    steps:
+      - name: Descargar el codigo
+        uses: actions/checkout@v4
+
+      - name: Normalizar la ruta del repositorio
+        id: repo
+        run: echo "ruta=${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+
+      - name: Calcular la etiqueta a desplegar
+        id: version
+        run: echo "tag=sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+      - name: Autenticarse en Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Conectar kubectl al cluster
+        uses: google-github-actions/get-gke-credentials@v2
+        with:
+          cluster_name: ${{ env.CLUSTER }}
+          location: ${{ env.ZONA }}
+
+      - name: Instalar Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: 'v3.16.2'
+
+      # Los secretos de la aplicacion nunca viven en el repositorio: se
+      # inyectan desde GitHub Secrets a un archivo temporal del runner.
+      - name: Reconstruir el archivo de secretos
+        run: |
+          printf '%s\n' "${{ secrets.HELM_VALUES_SECRETS }}" > /tmp/values-secrets.yaml
+          test -s /tmp/values-secrets.yaml
+
+      - name: Resolver subcharts
+        working-directory: P5/charts
+        run: helm dependency update
+
+      - name: Desplegar con Helm
+        working-directory: P5/charts
+        env:
+          BASE: ${{ env.REGISTRO }}/${{ steps.repo.outputs.ruta }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          helm upgrade --install ${{ env.RELEASE }} . \
+            -f values.yaml \
+            -f ../../P6/values-gke.yaml \
+            -f /tmp/values-secrets.yaml \
+            -n ${{ env.NAMESPACE }} --create-namespace \
+            --set-string "api-gateway.image.repository=$BASE/api-gateway" \
+            --set-string "api-gateway.image.tag=$TAG" \
+            --set-string "auth-service.image.repository=$BASE/auth-service" \
+            --set-string "auth-service.image.tag=$TAG" \
+            --set-string "tickets-service.image.repository=$BASE/tickets-service" \
+            --set-string "tickets-service.image.tag=$TAG" \
+            --set-string "comentarios-service.image.repository=$BASE/comentarios-service" \
+            --set-string "comentarios-service.image.tag=$TAG" \
+            --set-string "notificaciones-service.image.repository=$BASE/notificaciones-service" \
+            --set-string "notificaciones-service.image.tag=$TAG" \
+            --set-string "cronjobs.image.repository=$BASE/cronjobs" \
+            --set-string "cronjobs.image.tag=$TAG" \
+            --wait --timeout 10m
+
+      - name: Verificar el estado del despliegue
+        run: |
+          kubectl get pods -n ${{ env.NAMESPACE }}
+          kubectl rollout status deploy/${{ env.RELEASE }}-api-gateway -n ${{ env.NAMESPACE }} --timeout=5m
+
+      - name: Obtener la IP publica
+        id: ip
+        run: |
+          IP=$(kubectl get svc ${{ env.RELEASE }}-api-gateway -n ${{ env.NAMESPACE }} \
+               -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+          echo "direccion=$IP" >> "$GITHUB_OUTPUT"
+          echo "IP publica del sistema: $IP"
+
+      # Prueba de humo: confirma que lo recien desplegado responde de verdad.
+      # Si falla, el pipeline se marca en rojo aunque Helm haya dicho "ok".
+      - name: Prueba de humo contra el sistema desplegado
+        run: |
+          IP="${{ steps.ip.outputs.direccion }}"
+          for intento in $(seq 1 10); do
+            CODIGO=$(curl -s -o /dev/null -w "%{http_code}" "http://$IP:8080/health" || echo "000")
+            echo "Intento $intento -> HTTP $CODIGO"
+            if [ "$CODIGO" = "200" ]; then
+              echo "El sistema responde correctamente desde internet."
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "El servicio no respondio 200 tras 10 intentos."
+          exit 1
+
+      - name: Resumen del despliegue
+        if: always()
+        run: |
+          {
+            echo "### Despliegue en GKE"
+            echo ""
+            echo "| Dato | Valor |"
+            echo "|---|---|"
+            echo "| Commit | \`${GITHUB_SHA::7}\` |"
+            echo "| Etiqueta | \`${{ steps.version.outputs.tag }}\` |"
+            echo "| Cluster | \`${{ env.CLUSTER }}\` |"
+            echo "| Namespace | \`${{ env.NAMESPACE }}\` |"
+            echo "| IP publica | \`${{ steps.ip.outputs.direccion }}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
