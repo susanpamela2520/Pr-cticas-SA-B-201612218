@@ -154,7 +154,7 @@ jobs:
 
       - name: Analisis estatico del chart
         working-directory: P5/charts
-         run: helm lint . -f values.yaml -f ../../P6/values-gke.yaml -f ../../P7/values-ci.yaml
+        run: helm lint . -f values.yaml -f ../../P6/values-gke.yaml -f ../../P7/values-ci.yaml
 
       - name: Renderizar los manifiestos
         working-directory: P5/charts
