@@ -32,6 +32,7 @@ env:
 permissions:
   contents: read
   packages: write
+  id-token: write
 
 jobs:
 
@@ -269,7 +270,8 @@ jobs:
       - name: Autenticarse en Google Cloud
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          workload_identity_provider: projects/156744545241/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+          service_account: github-actions-deploy@p6-sa2s2026.iam.gserviceaccount.com
 
       - name: Conectar kubectl al cluster
         uses: google-github-actions/get-gke-credentials@v2
