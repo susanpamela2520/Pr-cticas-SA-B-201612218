@@ -287,9 +287,12 @@ jobs:
       # Los secretos de la aplicacion nunca viven en el repositorio: se
       # inyectan desde GitHub Secrets a un archivo temporal del runner.
       - name: Reconstruir el archivo de secretos
+        env:
+          CONTENIDO: ${{ secrets.HELM_VALUES_SECRETS }}
         run: |
-          printf '%s\n' "${{ secrets.HELM_VALUES_SECRETS }}" > /tmp/values-secrets.yaml
+          printf '%s' "$CONTENIDO" > /tmp/values-secrets.yaml
           test -s /tmp/values-secrets.yaml
+          head -3 /tmp/values-secrets.yaml | sed 's/:.*/: ***/'
 
       - name: Resolver subcharts
         working-directory: P5/charts
