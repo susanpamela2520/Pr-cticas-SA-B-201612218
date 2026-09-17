@@ -1,0 +1,8 @@
+# El estado puede contener valores sensibles y no debe versionarse.
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+*.tfvars
+!ejemplo.tfvars
+crash.log

@@ -1,0 +1,405 @@
+name: P8 - Cadena de suministro y GitOps
+
+# ---------------------------------------------------------------------------
+# DIFERENCIA FUNDAMENTAL CON LA PRACTICA 7
+#
+# Este workflow NO tiene acceso al cluster: no almacena credenciales de
+# Kubernetes ni ejecuta ninguna herramienta de despliegue contra el. Termina
+# abriendo un Pull Request en el repositorio de manifiestos, y ArgoCD es el
+# unico componente que aplica cambios al cluster.
+#
+# El motivo es concreto: en la P7 el pipeline tenia permisos de
+# administracion del cluster,
+# asi que comprometer el repositorio equivalia a comprometer la
+# infraestructura. Aqui el pipeline solo puede proponer un cambio de version;
+# aplicarlo requiere que alguien apruebe el PR.
+#
+# FASES
+#   1. Empaquetado ......... helm lint por servicio
+#   2. Analisis de CVE ..... Trivy; bloquea el PR ante criticas
+#   3. Construir y firmar .. imagen + SBOM + firma con Cosign
+#   4. Verificar firma ..... comprueba la firma antes de proponer el deploy
+#   5. Proponer version .... abre un PR en el repositorio GitOps
+# ---------------------------------------------------------------------------
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'P5/**'
+      - 'P8/**'
+      - '.github/workflows/p8-supply-chain.yml'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version a construir y proponer (ej. v1.0.1)'
+        required: true
+        type: string
+
+env:
+  REGISTRO: ghcr.io
+  SERVICIO: api-gateway
+  REPO_GITOPS: susanpamela2520/Pr-cticas-SA-B-201612218-gitops
+
+permissions:
+  contents: read
+  packages: write
+  # Necesario para que Cosign firme sin llaves, usando el token OIDC de
+  # Actions como identidad (firma keyless de Sigstore).
+  id-token: write
+  security-events: write
+
+jobs:
+
+  # =========================================================================
+  # FASE 1 - EMPAQUETADO CON HELM
+  # =========================================================================
+  empaquetado:
+    name: "1. Validar charts de Helm"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: azure/setup-helm@v4
+        with:
+          version: 'v3.16.2'
+
+      - name: Validar el chart por ambiente
+        working-directory: P5/charts
+        run: |
+          helm dependency update
+          for AMBIENTE in staging prod; do
+            echo "::group::helm lint - ambiente $AMBIENTE"
+            helm lint . \
+              -f values.yaml \
+              -f ../../P8/charts/values-$AMBIENTE.yaml \
+              -f ../../P7/values-ci.yaml
+            echo "::endgroup::"
+          done
+
+      - name: Renderizar y verificar conformidad con las politicas
+        working-directory: P5/charts
+        run: |
+          # Comprobacion temprana de lo mismo que Kyverno exigira en el
+          # cluster. Detectarlo aqui evita que ArgoCD falle al sincronizar.
+          helm template sa-platform . \
+            -f values.yaml \
+            -f ../../P8/charts/values-prod.yaml \
+            -f ../../P7/values-ci.yaml \
+            -n sa-prod > /tmp/render.yaml
+
+          if grep -qE 'image:.*:latest' /tmp/render.yaml; then
+            echo "::error::Se detecto la etiqueta latest. La politica disallow-latest-tag rechazaria este despliegue."
+            exit 1
+          fi
+          echo "Sin etiquetas latest en los manifiestos renderizados."
+
+  # =========================================================================
+  # FASE 2 - ANALISIS DE VULNERABILIDADES
+  # Bloquea el Pull Request ante CVE criticas.
+  # =========================================================================
+  analisis-cve:
+    name: "2. Analisis de CVE con Trivy"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Construir la imagen localmente para analizarla
+        run: docker build -t analisis-local:${{ github.sha }} P5/${{ env.SERVICIO }}
+
+      # Primer paso informativo: deja el reporte completo como evidencia.
+      - name: Reporte completo de vulnerabilidades
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: analisis-local:${{ github.sha }}
+          format: table
+          output: reporte-trivy.txt
+          severity: LOW,MEDIUM,HIGH,CRITICAL
+          exit-code: '0'
+
+      - name: Mostrar el reporte en el resumen
+        run: |
+          {
+            echo "### Reporte de vulnerabilidades (Trivy)"
+            echo ""
+            echo '```'
+            head -60 reporte-trivy.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # Segundo paso bloqueante: este es el que detiene el pipeline.
+      - name: Bloquear ante vulnerabilidades criticas
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: analisis-local:${{ github.sha }}
+          format: table
+          severity: CRITICAL
+          # Solo cuenta lo que tiene parche disponible: una CVE critica sin
+          # solucion publicada no se arregla bloqueando el pipeline, y
+          # tratarla como bloqueante solo ensena al equipo a ignorar la
+          # alerta.
+          ignore-unfixed: true
+          exit-code: '1'
+
+      - name: Formato SARIF para la pestana Security
+        if: always()
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: analisis-local:${{ github.sha }}
+          format: sarif
+          output: trivy.sarif
+          severity: HIGH,CRITICAL
+          exit-code: '0'
+
+      - name: Publicar en la pestana Security
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy.sarif
+          category: trivy
+
+      - name: Guardar el reporte como artefacto
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reporte-trivy
+          path: reporte-trivy.txt
+          retention-days: 30
+
+  # =========================================================================
+  # FASE 3 - CONSTRUIR, GENERAR SBOM Y FIRMAR
+  # Solo corre para tags: no se firma nada que no sea una version.
+  # =========================================================================
+  construir-y-firmar:
+    name: "3. Construir, SBOM y firmar"
+    runs-on: ubuntu-latest
+    needs: [empaquetado, analisis-cve]
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+    outputs:
+      version: ${{ steps.version.outputs.valor }}
+      digest: ${{ steps.build.outputs.digest }}
+      imagen: ${{ steps.repo.outputs.ruta }}/${{ env.SERVICIO }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Normalizar la ruta del repositorio
+        id: repo
+        run: echo "ruta=${REGISTRO}/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+        env:
+          REGISTRO: ${{ env.REGISTRO }}
+
+      - name: Determinar la version semantica
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VALOR="${{ inputs.version }}"
+          else
+            VALOR="${GITHUB_REF#refs/tags/}"
+          fi
+          # La etiqueta se deriva de un tag de Git, nunca de latest: es
+          # requisito de la practica y condicion del modelo GitOps.
+          echo "valor=$VALOR" >> "$GITHUB_OUTPUT"
+          echo "Version a construir: $VALOR"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRO }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Construir y publicar
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: P5/${{ env.SERVICIO }}
+          push: true
+          tags: ${{ steps.repo.outputs.ruta }}/${{ env.SERVICIO }}:${{ steps.version.outputs.valor }}
+          # Adjunta la procedencia y el SBOM como atestaciones de la imagen.
+          provenance: true
+          sbom: true
+          cache-from: type=gha,scope=${{ env.SERVICIO }}
+          cache-to: type=gha,mode=max,scope=${{ env.SERVICIO }}
+
+      # --- SBOM: inventario de todo lo que contiene la imagen -------------
+      - name: Generar SBOM en formato CycloneDX
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ steps.repo.outputs.ruta }}/${{ env.SERVICIO }}:${{ steps.version.outputs.valor }}
+          format: cyclonedx-json
+          output-file: sbom-${{ steps.version.outputs.valor }}.cdx.json
+
+      - name: Guardar el SBOM como artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ steps.version.outputs.valor }}
+          path: sbom-*.cdx.json
+          retention-days: 90
+
+      # --- Firma con Cosign, sin llaves ------------------------------------
+      - name: Instalar Cosign
+        uses: sigstore/cosign-installer@v3.7.0
+
+      - name: Firmar la imagen
+        env:
+          IMAGEN: ${{ steps.repo.outputs.ruta }}/${{ env.SERVICIO }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          # Firma keyless: la identidad es el token OIDC de este workflow,
+          # no una llave privada guardada en un secreto. No hay nada que
+          # rotar ni que se pueda filtrar, y la firma queda registrada de
+          # forma publica y auditable en el log de transparencia de Sigstore.
+          cosign sign --yes "${IMAGEN}@${DIGEST}"
+          echo "Imagen firmada: ${IMAGEN}@${DIGEST}"
+
+      - name: Adjuntar el SBOM a la imagen firmada
+        env:
+          IMAGEN: ${{ steps.repo.outputs.ruta }}/${{ env.SERVICIO }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          cosign attest --yes \
+            --predicate sbom-${{ steps.version.outputs.valor }}.cdx.json \
+            --type cyclonedx \
+            "${IMAGEN}@${DIGEST}"
+
+  # =========================================================================
+  # FASE 4 - VERIFICAR LA FIRMA
+  # Paso independiente a proposito: comprueba la firma como lo haria un
+  # tercero, sin apoyarse en el estado del job que la creo.
+  # =========================================================================
+  verificar-firma:
+    name: "4. Verificar la firma"
+    runs-on: ubuntu-latest
+    needs: construir-y-firmar
+    steps:
+      - name: Instalar Cosign
+        uses: sigstore/cosign-installer@v3.7.0
+
+      - name: Verificar firma y procedencia
+        env:
+          IMAGEN: ${{ needs.construir-y-firmar.outputs.imagen }}
+          DIGEST: ${{ needs.construir-y-firmar.outputs.digest }}
+        run: |
+          # Las dos condiciones verifican QUIEN firmo y DESDE DONDE:
+          #   - certificate-identity-regexp: el workflow de este repositorio
+          #   - certificate-oidc-issuer:     emitido por GitHub Actions
+          # Sin ellas, cualquier firma valida pasaria, incluida la de un
+          # atacante con su propia identidad de Sigstore.
+          cosign verify \
+            --certificate-identity-regexp "https://github.com/${GITHUB_REPOSITORY}/.github/workflows/.*" \
+            --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+            "${IMAGEN}@${DIGEST}" | tee verificacion-cosign.txt
+
+          echo "Firma verificada correctamente."
+
+      - name: Guardar la salida de verificacion
+        uses: actions/upload-artifact@v4
+        with:
+          name: verificacion-cosign
+          path: verificacion-cosign.txt
+          retention-days: 90
+
+      - name: Resumen de la verificacion
+        run: |
+          {
+            echo "### Verificacion de firma (Cosign)"
+            echo ""
+            echo "| Dato | Valor |"
+            echo "|---|---|"
+            echo "| Imagen | \`${{ needs.construir-y-firmar.outputs.imagen }}\` |"
+            echo "| Version | \`${{ needs.construir-y-firmar.outputs.version }}\` |"
+            echo "| Digest | \`${{ needs.construir-y-firmar.outputs.digest }}\` |"
+            echo "| Firma | verificada |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # =========================================================================
+  # FASE 5 - PROPONER LA NUEVA VERSION EN EL REPOSITORIO GITOPS
+  #
+  # Aqui termina el pipeline. No despliega: abre un Pull Request que cambia
+  # una sola linea --la etiqueta de la imagen-- en el repositorio de
+  # manifiestos. ArgoCD detecta el merge y aplica el cambio al cluster.
+  # =========================================================================
+  proponer-version:
+    name: "5. Abrir PR en el repositorio GitOps"
+    runs-on: ubuntu-latest
+    needs: [construir-y-firmar, verificar-firma]
+    steps:
+      - name: Clonar el repositorio de manifiestos
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.REPO_GITOPS }}
+          # Token de acceso personal con permiso sobre el repo GitOps. El
+          # GITHUB_TOKEN por defecto solo alcanza al repositorio actual.
+          token: ${{ secrets.GITOPS_TOKEN }}
+          path: gitops
+
+      - name: Actualizar la etiqueta de la imagen
+        working-directory: gitops
+        env:
+          IMAGEN: ${{ needs.construir-y-firmar.outputs.imagen }}
+          VERSION: ${{ needs.construir-y-firmar.outputs.version }}
+        run: |
+          ARCHIVO="rollouts/api-gateway-rollout.yaml"
+
+          echo "Version anterior:"
+          grep "image:" "$ARCHIVO"
+
+          # Reemplaza unicamente la etiqueta, conservando la ruta.
+          sed -i "s|\(image: ${IMAGEN}\):.*|\1:${VERSION}|" "$ARCHIVO"
+
+          echo "Version nueva:"
+          grep "image:" "$ARCHIVO"
+
+          # Si el sed no cambio nada, algo esta mal y no tiene sentido
+          # abrir un PR vacio.
+          git diff --quiet "$ARCHIVO" && {
+            echo "::error::La etiqueta no cambio. Revisa que la ruta de la imagen coincida."
+            exit 1
+          }
+
+      - name: Abrir el Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITOPS_TOKEN }}
+          path: gitops
+          branch: promover/${{ needs.construir-y-firmar.outputs.version }}
+          commit-message: "Promover api-gateway a ${{ needs.construir-y-firmar.outputs.version }}"
+          title: "Promover api-gateway a ${{ needs.construir-y-firmar.outputs.version }}"
+          body: |
+            ## Promocion de version
+
+            Pull Request generado automaticamente por el pipeline del
+            repositorio de codigo. **El pipeline no tiene acceso al
+            cluster**: al aprobar este PR, ArgoCD detecta el cambio y aplica
+            la nueva version mediante un rollout canary.
+
+            | Dato | Valor |
+            |---|---|
+            | Servicio | `api-gateway` |
+            | Version | `${{ needs.construir-y-firmar.outputs.version }}` |
+            | Imagen | `${{ needs.construir-y-firmar.outputs.imagen }}` |
+            | Digest | `${{ needs.construir-y-firmar.outputs.digest }}` |
+
+            ### Controles superados
+
+            - [x] `helm lint` en los dos ambientes
+            - [x] Sin etiquetas `latest` en los manifiestos renderizados
+            - [x] Analisis de CVE con Trivy, sin criticas con parche disponible
+            - [x] SBOM generado en formato CycloneDX
+            - [x] Imagen firmada con Cosign (keyless)
+            - [x] Firma verificada de forma independiente
+
+            ### Que ocurre al aprobar
+
+            1. ArgoCD detecta el cambio en `main` (sondeo cada 3 minutos)
+            2. Argo Rollouts inicia el canary: 20 % → 50 % → 100 %
+            3. En cada paso corre el `AnalysisTemplate` de validacion
+            4. Si alguna metrica no alcanza su umbral, la reversion es
+               automatica
+
+            Ejecucion del pipeline: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

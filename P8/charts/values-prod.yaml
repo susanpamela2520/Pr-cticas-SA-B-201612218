@@ -1,0 +1,42 @@
+# ---------------------------------------------------------------------------
+# Valores para el ambiente de PRODUCCION (namespace sa-prod)
+#
+# Cuota holgada a proposito: durante la promocion del canary coexisten
+# replicas de la version estable y de la candidata, asi que el consumo pico
+# supera al de operacion normal. En la P6 el namespace quedo al 97 % de su
+# cuota y el HPA no pudo escalar; aqui se evita ese problema por diseno.
+#
+# Kyverno BLOQUEA en este namespace.
+# ---------------------------------------------------------------------------
+global:
+  logLevel: info
+  cookieSecure: "false"
+
+api-gateway:
+  replicaCount: 5
+  service:
+    type: LoadBalancer
+  resources:
+    requests: { cpu: 100m, memory: 128Mi }
+    limits: { cpu: 500m, memory: 512Mi }
+
+auth-service:
+  replicaCount: 2
+tickets-service:
+  replicaCount: 2
+comentarios-service:
+  replicaCount: 2
+notificaciones-service:
+  replicaCount: 2
+
+db:
+  storage:
+    size: 2Gi
+    storageClassName: standard-rwo
+
+resourceQuota:
+  requestsCpu: "4"
+  requestsMemory: "4Gi"
+  limitsCpu: "8"
+  limitsMemory: "8Gi"
+  maxPods: "50"

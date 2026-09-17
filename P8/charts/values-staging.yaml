@@ -1,0 +1,42 @@
+# ---------------------------------------------------------------------------
+# Valores para el ambiente de STAGING (namespace sa-staging)
+#
+# Menos replicas y recursos: staging valida que el sistema arranca y
+# responde, no que soporta carga de produccion.
+#
+# Kyverno aqui solo AUDITA (etiqueta sa-platform/aplicar-politicas=auditar),
+# de modo que un manifiesto no conforme se registra pero no se bloquea. Eso
+# permite detectar el problema sin frenar la iteracion.
+# ---------------------------------------------------------------------------
+global:
+  logLevel: debug
+  cookieSecure: "false"
+
+api-gateway:
+  replicaCount: 2
+  service:
+    type: ClusterIP
+  resources:
+    requests: { cpu: 100m, memory: 128Mi }
+    limits: { cpu: 300m, memory: 256Mi }
+
+auth-service:
+  replicaCount: 1
+tickets-service:
+  replicaCount: 1
+comentarios-service:
+  replicaCount: 1
+notificaciones-service:
+  replicaCount: 1
+
+db:
+  storage:
+    size: 1Gi
+    storageClassName: standard-rwo
+
+resourceQuota:
+  requestsCpu: "2"
+  requestsMemory: "2Gi"
+  limitsCpu: "4"
+  limitsMemory: "4Gi"
+  maxPods: "30"
