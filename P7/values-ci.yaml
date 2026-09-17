@@ -1,0 +1,32 @@
+# ---------------------------------------------------------------------------
+# P7/values-ci.yaml
+#
+# Valores de relleno usados UNICAMENTE dentro del pipeline, en la etapa de
+# validacion del chart (`helm lint` y `helm template`).
+#
+# El chart exige que existan ciertas credenciales para poder renderizarse.
+# En el pipeline no queremos --y no debemos-- exponer las reales, asi que se
+# sustituyen por valores ficticios: a esta altura solo se comprueba que las
+# plantillas produzcan YAML valido, no se conecta con nada.
+#
+# Las credenciales reales viven en el secreto HELM_VALUES_SECRETS de GitHub
+# y solo se materializan en la etapa 4, dentro del runner, en /tmp.
+# ---------------------------------------------------------------------------
+global:
+  dbUsername: usuario-ci
+  dbPassword: contrasena-ficticia-de-ci
+  dbName: sa_platform_db
+  rabbitmqUsername: usuario-ci
+  rabbitmqPassword: contrasena-ficticia-de-ci
+  rabbitmqQueueTicketsResueltos: tickets.resueltos
+  rabbitmqQueueResumenesCron: cron.resumenes
+  jwtSecret: 00000000000000000000000000000000000000000000000000000000000000
+  jwtTtlSegundos: 900
+  jwtRenovacionGraciaSegundos: 300
+  aesKeyHex: 0000000000000000000000000000000000000000000000000000000000000000
+  correoHashSecret: 000000000000000000000000000000000000000000000000
+  cookieSecure: "false"
+  logLevel: info
+
+cronjobs:
+  carne: "201612218"
