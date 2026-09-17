@@ -288,11 +288,10 @@ jobs:
       # inyectan desde GitHub Secrets a un archivo temporal del runner.
       - name: Reconstruir el archivo de secretos
         env:
-          CONTENIDO: ${{ secrets.HELM_VALUES_SECRETS }}
+          CONTENIDO_B64: ${{ secrets.HELM_VALUES_SECRETS_B64 }}
         run: |
-          printf '%s' "$CONTENIDO" > /tmp/values-secrets.yaml
-          test -s /tmp/values-secrets.yaml
-          head -3 /tmp/values-secrets.yaml | sed 's/:.*/: ***/'
+          echo "$CONTENIDO_B64" | base64 -d > /tmp/values-secrets.yaml
+          python3 -c "import yaml; d=yaml.safe_load(open('/tmp/values-secrets.yaml')); print('YAML valido, claves de nivel superior:', list(d.keys()))"
 
       - name: Resolver subcharts
         working-directory: P5/charts
