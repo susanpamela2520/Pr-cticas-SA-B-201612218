@@ -1,3 +1,7 @@
 gcp-key.json
 *-key.json
 node_modules/
+values-secrets.yaml
+secretos.env
+pub-cert.pem
+gcp-key.json
