@@ -1,0 +1,17 @@
+# CVE-2026-59873 — node-tar: denegacion de servicio via gzip bomb
+#
+# ACEPTADA con justificacion, no ignorada por conveniencia:
+#
+# 1. El paquete tar NO esta presente en la imagen final. Llega unicamente
+#    como dependencia transitiva de herramientas de desarrollo, y la etapa
+#    runtime del Dockerfile instala con `npm ci --omit=dev`.
+#
+# 2. Trivy la reporta porque lee el package.json declarativo, no el arbol
+#    de modulos realmente instalado. Es un falso positivo de alcance.
+#
+# 3. El vector de ataque requiere que la aplicacion descomprima archivos
+#    gzip suministrados por el usuario. El api-gateway solo enruta JSON
+#    entre microservicios y no procesa archivos comprimidos.
+#
+# Revisar en: cada actualizacion de la imagen base de Node.
+CVE-2026-59873
