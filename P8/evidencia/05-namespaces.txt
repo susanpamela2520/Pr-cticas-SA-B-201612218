@@ -1,0 +1,8 @@
+sa-prod                             Active   6m52s   app.kubernetes.io/managed-by=terraform,app.kubernetes.io/part-of=sa-platform,kubernetes.io/metadata.name=sa-prod,sa-platform/ambiente=prod,sa-platform/aplicar-politicas=bloquear
+sa-staging                          Active   6m52s   app.kubernetes.io/managed-by=terraform,app.kubernetes.io/part-of=sa-platform,kubernetes.io/metadata.name=sa-staging,sa-platform/ambiente=staging,sa-platform/aplicar-politicas=auditar
+
+sa-prod                             sa-prod-cuota                             pods: 0/50, requests.cpu: 0/4, requests.memory: 0/4Gi   limits.cpu: 0/8, limits.memory: 0/8Gi   6m52s
+sa-staging                          sa-staging-cuota                          pods: 0/30, requests.cpu: 0/2, requests.memory: 0/2Gi   limits.cpu: 0/4, limits.memory: 0/4Gi   6m52s
+
+sa-prod      sa-prod-limites      2026-09-19T00:13:23Z
+sa-staging   sa-staging-limites   2026-09-19T00:13:23Z

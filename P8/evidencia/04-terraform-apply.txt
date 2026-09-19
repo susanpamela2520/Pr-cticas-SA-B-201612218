@@ -1,0 +1,731 @@
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  [32m+[0m create[0m
+
+Terraform will perform the following actions:
+
+[1m  # kubernetes_limit_range.limites["prod"][0m will be created
+[0m  [32m+[0m[0m resource "kubernetes_limit_range" "limites" {
+      [32m+[0m[0m id = (known after apply)
+
+      [32m+[0m[0m metadata {
+          [32m+[0m[0m generation       = (known after apply)
+          [32m+[0m[0m name             = "sa-prod-limites"
+          [32m+[0m[0m namespace        = "sa-prod"
+          [32m+[0m[0m resource_version = (known after apply)
+          [32m+[0m[0m uid              = (known after apply)
+        }
+
+      [32m+[0m[0m spec {
+          [32m+[0m[0m limit {
+              [32m+[0m[0m default         = {
+                  [32m+[0m[0m "cpu"    = "250m"
+                  [32m+[0m[0m "memory" = "256Mi"
+                }
+              [32m+[0m[0m default_request = {
+                  [32m+[0m[0m "cpu"    = "100m"
+                  [32m+[0m[0m "memory" = "128Mi"
+                }
+              [32m+[0m[0m max             = {
+                  [32m+[0m[0m "cpu"    = "1"
+                  [32m+[0m[0m "memory" = "1Gi"
+                }
+              [32m+[0m[0m type            = "Container"
+            }
+        }
+    }
+
+[1m  # kubernetes_limit_range.limites["staging"][0m will be created
+[0m  [32m+[0m[0m resource "kubernetes_limit_range" "limites" {
+      [32m+[0m[0m id = (known after apply)
+
+      [32m+[0m[0m metadata {
+          [32m+[0m[0m generation       = (known after apply)
+          [32m+[0m[0m name             = "sa-staging-limites"
+          [32m+[0m[0m namespace        = "sa-staging"
+          [32m+[0m[0m resource_version = (known after apply)
+          [32m+[0m[0m uid              = (known after apply)
+        }
+
+      [32m+[0m[0m spec {
+          [32m+[0m[0m limit {
+              [32m+[0m[0m default         = {
+                  [32m+[0m[0m "cpu"    = "250m"
+                  [32m+[0m[0m "memory" = "256Mi"
+                }
+              [32m+[0m[0m default_request = {
+                  [32m+[0m[0m "cpu"    = "100m"
+                  [32m+[0m[0m "memory" = "128Mi"
+                }
+              [32m+[0m[0m max             = {
+                  [32m+[0m[0m "cpu"    = "1"
+                  [32m+[0m[0m "memory" = "1Gi"
+                }
+              [32m+[0m[0m type            = "Container"
+            }
+        }
+    }
+
+[1m  # kubernetes_namespace.ambientes["prod"][0m will be created
+[0m  [32m+[0m[0m resource "kubernetes_namespace" "ambientes" {
+      [32m+[0m[0m id                               = (known after apply)
+      [32m+[0m[0m wait_for_default_service_account = false
+
+      [32m+[0m[0m metadata {
+          [32m+[0m[0m generation       = (known after apply)
+          [32m+[0m[0m labels           = {
+              [32m+[0m[0m "app.kubernetes.io/managed-by"  = "terraform"
+              [32m+[0m[0m "app.kubernetes.io/part-of"     = "sa-platform"
+              [32m+[0m[0m "sa-platform/ambiente"          = "prod"
+              [32m+[0m[0m "sa-platform/aplicar-politicas" = "bloquear"
+            }
+          [32m+[0m[0m name             = "sa-prod"
+          [32m+[0m[0m resource_version = (known after apply)
+          [32m+[0m[0m uid              = (known after apply)
+        }
+    }
+
+[1m  # kubernetes_namespace.ambientes["staging"][0m will be created
+[0m  [32m+[0m[0m resource "kubernetes_namespace" "ambientes" {
+      [32m+[0m[0m id                               = (known after apply)
+      [32m+[0m[0m wait_for_default_service_account = false
+
+      [32m+[0m[0m metadata {
+          [32m+[0m[0m generation       = (known after apply)
+          [32m+[0m[0m labels           = {
+              [32m+[0m[0m "app.kubernetes.io/managed-by"  = "terraform"
+              [32m+[0m[0m "app.kubernetes.io/part-of"     = "sa-platform"
+              [32m+[0m[0m "sa-platform/ambiente"          = "staging"
+              [32m+[0m[0m "sa-platform/aplicar-politicas" = "auditar"
+            }
+          [32m+[0m[0m name             = "sa-staging"
+          [32m+[0m[0m resource_version = (known after apply)
+          [32m+[0m[0m uid              = (known after apply)
+        }
+    }
+
+[1m  # kubernetes_resource_quota.cuota["prod"][0m will be created
+[0m  [32m+[0m[0m resource "kubernetes_resource_quota" "cuota" {
+      [32m+[0m[0m id = (known after apply)
+
+      [32m+[0m[0m metadata {
+          [32m+[0m[0m generation       = (known after apply)
+          [32m+[0m[0m name             = "sa-prod-cuota"
+          [32m+[0m[0m namespace        = "sa-prod"
+          [32m+[0m[0m resource_version = (known after apply)
+          [32m+[0m[0m uid              = (known after apply)
+        }
+
+      [32m+[0m[0m spec {
+          [32m+[0m[0m hard = {
+              [32m+[0m[0m "limits.cpu"      = "8"
+              [32m+[0m[0m "limits.memory"   = "8Gi"
+              [32m+[0m[0m "pods"            = "50"
+              [32m+[0m[0m "requests.cpu"    = "4"
+              [32m+[0m[0m "requests.memory" = "4Gi"
+            }
+        }
+    }
+
+[1m  # kubernetes_resource_quota.cuota["staging"][0m will be created
+[0m  [32m+[0m[0m resource "kubernetes_resource_quota" "cuota" {
+      [32m+[0m[0m id = (known after apply)
+
+      [32m+[0m[0m metadata {
+          [32m+[0m[0m generation       = (known after apply)
+          [32m+[0m[0m name             = "sa-staging-cuota"
+          [32m+[0m[0m namespace        = "sa-staging"
+          [32m+[0m[0m resource_version = (known after apply)
+          [32m+[0m[0m uid              = (known after apply)
+        }
+
+      [32m+[0m[0m spec {
+          [32m+[0m[0m hard = {
+              [32m+[0m[0m "limits.cpu"      = "4"
+              [32m+[0m[0m "limits.memory"   = "4Gi"
+              [32m+[0m[0m "pods"            = "30"
+              [32m+[0m[0m "requests.cpu"    = "2"
+              [32m+[0m[0m "requests.memory" = "2Gi"
+            }
+        }
+    }
+
+[1m  # kubernetes_role.analisis["prod"][0m will be created
+[0m  [32m+[0m[0m resource "kubernetes_role" "analisis" {
+      [32m+[0m[0m id = (known after apply)
+
+      [32m+[0m[0m metadata {
+          [32m+[0m[0m generation       = (known after apply)
+          [32m+[0m[0m name             = "ejecutor-de-analisis"
+          [32m+[0m[0m namespace        = "sa-prod"
+          [32m+[0m[0m resource_version = (known after apply)
+          [32m+[0m[0m uid              = (known after apply)
+        }
+
+      [32m+[0m[0m rule {
+          [32m+[0m[0m api_groups = [
+              [32m+[0m[0m [90mnull[0m[0m,
+              [32m+[0m[0m "batch",
+            ]
+          [32m+[0m[0m resources  = [
+              [32m+[0m[0m "jobs",
+              [32m+[0m[0m "pods",
+              [32m+[0m[0m "pods/log",
+            ]
+          [32m+[0m[0m verbs      = [
+              [32m+[0m[0m "create",
+              [32m+[0m[0m "delete",
+              [32m+[0m[0m "get",
+              [32m+[0m[0m "list",
+              [32m+[0m[0m "watch",
+            ]
+        }
+    }
+
+[1m  # kubernetes_role.analisis["staging"][0m will be created
+[0m  [32m+[0m[0m resource "kubernetes_role" "analisis" {
+      [32m+[0m[0m id = (known after apply)
+
+      [32m+[0m[0m metadata {
+          [32m+[0m[0m generation       = (known after apply)
+          [32m+[0m[0m name             = "ejecutor-de-analisis"
+          [32m+[0m[0m namespace        = "sa-staging"
+          [32m+[0m[0m resource_version = (known after apply)
+          [32m+[0m[0m uid              = (known after apply)
+        }
+
+      [32m+[0m[0m rule {
+          [32m+[0m[0m api_groups = [
+              [32m+[0m[0m [90mnull[0m[0m,
+              [32m+[0m[0m "batch",
+            ]
+          [32m+[0m[0m resources  = [
+              [32m+[0m[0m "jobs",
+              [32m+[0m[0m "pods",
+              [32m+[0m[0m "pods/log",
+            ]
+          [32m+[0m[0m verbs      = [
+              [32m+[0m[0m "create",
+              [32m+[0m[0m "delete",
+              [32m+[0m[0m "get",
+              [32m+[0m[0m "list",
+              [32m+[0m[0m "watch",
+            ]
+        }
+    }
+
+[1m  # kubernetes_role.aplicador["prod"][0m will be created
+[0m  [32m+[0m[0m resource "kubernetes_role" "aplicador" {
+      [32m+[0m[0m id = (known after apply)
+
+      [32m+[0m[0m metadata {
+          [32m+[0m[0m generation       = (known after apply)
+          [32m+[0m[0m name             = "aplicador-de-cargas"
+          [32m+[0m[0m namespace        = "sa-prod"
+          [32m+[0m[0m resource_version = (known after apply)
+          [32m+[0m[0m uid              = (known after apply)
+        }
+
+      [32m+[0m[0m rule {
+          [32m+[0m[0m api_groups = [
+              [32m+[0m[0m [90mnull[0m[0m,
+              [32m+[0m[0m "apps",
+              [32m+[0m[0m "autoscaling",
+              [32m+[0m[0m "batch",
+              [32m+[0m[0m "networking.k8s.io",
+            ]
+          [32m+[0m[0m resources  = [
+              [32m+[0m[0m "*",
+            ]
+          [32m+[0m[0m verbs      = [
+              [32m+[0m[0m "create",
+              [32m+[0m[0m "delete",
+              [32m+[0m[0m "get",
+              [32m+[0m[0m "list",
+              [32m+[0m[0m "patch",
+              [32m+[0m[0m "update",
+              [32m+[0m[0m "watch",
+            ]
+        }
+      [32m+[0m[0m rule {
+          [32m+[0m[0m api_groups = [
+              [32m+[0m[0m "argoproj.io",
+            ]
+          [32m+[0m[0m resources  = [
+              [32m+[0m[0m "analysisruns",
+              [32m+[0m[0m "analysistemplates",
+              [32m+[0m[0m "experiments",
+              [32m+[0m[0m "rollouts",
+            ]
+          [32m+[0m[0m verbs      = [
+              [32m+[0m[0m "create",
+              [32m+[0m[0m "delete",
+              [32m+[0m[0m "get",
+              [32m+[0m[0m "list",
+              [32m+[0m[0m "patch",
+              [32m+[0m[0m "update",
+              [32m+[0m[0m "watch",
+            ]
+        }
+    }
+
+[1m  # kubernetes_role.aplicador["staging"][0m will be created
+[0m  [32m+[0m[0m resource "kubernetes_role" "aplicador" {
+      [32m+[0m[0m id = (known after apply)
+
+      [32m+[0m[0m metadata {
+          [32m+[0m[0m generation       = (known after apply)
+          [32m+[0m[0m name             = "aplicador-de-cargas"
+          [32m+[0m[0m namespace        = "sa-staging"
+          [32m+[0m[0m resource_version = (known after apply)
+          [32m+[0m[0m uid              = (known after apply)
+        }
+
+      [32m+[0m[0m rule {
+          [32m+[0m[0m api_groups = [
+              [32m+[0m[0m [90mnull[0m[0m,
+              [32m+[0m[0m "apps",
+              [32m+[0m[0m "autoscaling",
+              [32m+[0m[0m "batch",
+              [32m+[0m[0m "networking.k8s.io",
+            ]
+          [32m+[0m[0m resources  = [
+              [32m+[0m[0m "*",
+            ]
+          [32m+[0m[0m verbs      = [
+              [32m+[0m[0m "create",
+              [32m+[0m[0m "delete",
+              [32m+[0m[0m "get",
+              [32m+[0m[0m "list",
+              [32m+[0m[0m "patch",
+              [32m+[0m[0m "update",
+              [32m+[0m[0m "watch",
+            ]
+        }
+      [32m+[0m[0m rule {
+          [32m+[0m[0m api_groups = [
+              [32m+[0m[0m "argoproj.io",
+            ]
+          [32m+[0m[0m resources  = [
+              [32m+[0m[0m "analysisruns",
+              [32m+[0m[0m "analysistemplates",
+              [32m+[0m[0m "experiments",
+              [32m+[0m[0m "rollouts",
+            ]
+          [32m+[0m[0m verbs      = [
+              [32m+[0m[0m "create",
+              [32m+[0m[0m "delete",
+              [32m+[0m[0m "get",
+              [32m+[0m[0m "list",
+              [32m+[0m[0m "patch",
+              [32m+[0m[0m "update",
+              [32m+[0m[0m "watch",
+            ]
+        }
+    }
+
+[1m  # kubernetes_role.lector["prod"][0m will be created
+[0m  [32m+[0m[0m resource "kubernetes_role" "lector" {
+      [32m+[0m[0m id = (known after apply)
+
+      [32m+[0m[0m metadata {
+          [32m+[0m[0m generation       = (known after apply)
+          [32m+[0m[0m name             = "solo-lectura"
+          [32m+[0m[0m namespace        = "sa-prod"
+          [32m+[0m[0m resource_version = (known after apply)
+          [32m+[0m[0m uid              = (known after apply)
+        }
+
+      [32m+[0m[0m rule {
+          [32m+[0m[0m api_groups = [
+              [32m+[0m[0m [90mnull[0m[0m,
+              [32m+[0m[0m "apps",
+              [32m+[0m[0m "argoproj.io",
+            ]
+          [32m+[0m[0m resources  = [
+              [32m+[0m[0m "deployments",
+              [32m+[0m[0m "events",
+              [32m+[0m[0m "pods",
+              [32m+[0m[0m "replicasets",
+              [32m+[0m[0m "rollouts",
+              [32m+[0m[0m "services",
+            ]
+          [32m+[0m[0m verbs      = [
+              [32m+[0m[0m "get",
+              [32m+[0m[0m "list",
+              [32m+[0m[0m "watch",
+            ]
+        }
+    }
+
+[1m  # kubernetes_role.lector["staging"][0m will be created
+[0m  [32m+[0m[0m resource "kubernetes_role" "lector" {
+      [32m+[0m[0m id = (known after apply)
+
+      [32m+[0m[0m metadata {
+          [32m+[0m[0m generation       = (known after apply)
+          [32m+[0m[0m name             = "solo-lectura"
+          [32m+[0m[0m namespace        = "sa-staging"
+          [32m+[0m[0m resource_version = (known after apply)
+          [32m+[0m[0m uid              = (known after apply)
+        }
+
+      [32m+[0m[0m rule {
+          [32m+[0m[0m api_groups = [
+              [32m+[0m[0m [90mnull[0m[0m,
+              [32m+[0m[0m "apps",
+              [32m+[0m[0m "argoproj.io",
+            ]
+          [32m+[0m[0m resources  = [
+              [32m+[0m[0m "deployments",
+              [32m+[0m[0m "events",
+              [32m+[0m[0m "pods",
+              [32m+[0m[0m "replicasets",
+              [32m+[0m[0m "rollouts",
+              [32m+[0m[0m "services",
+            ]
+          [32m+[0m[0m verbs      = [
+              [32m+[0m[0m "get",
+              [32m+[0m[0m "list",
+              [32m+[0m[0m "watch",
+            ]
+        }
+    }
+
+[1m  # kubernetes_role_binding.analisis["prod"][0m will be created
+[0m  [32m+[0m[0m resource "kubernetes_role_binding" "analisis" {
+      [32m+[0m[0m id = (known after apply)
+
+      [32m+[0m[0m metadata {
+          [32m+[0m[0m generation       = (known after apply)
+          [32m+[0m[0m name             = "analisis-rollouts"
+          [32m+[0m[0m namespace        = "sa-prod"
+          [32m+[0m[0m resource_version = (known after apply)
+          [32m+[0m[0m uid              = (known after apply)
+        }
+
+      [32m+[0m[0m role_ref {
+          [32m+[0m[0m api_group = "rbac.authorization.k8s.io"
+          [32m+[0m[0m kind      = "Role"
+          [32m+[0m[0m name      = "ejecutor-de-analisis"
+        }
+
+      [32m+[0m[0m subject {
+          [32m+[0m[0m api_group = (known after apply)
+          [32m+[0m[0m kind      = "ServiceAccount"
+          [32m+[0m[0m name      = "analisis-rollouts"
+          [32m+[0m[0m namespace = "sa-prod"
+        }
+    }
+
+[1m  # kubernetes_role_binding.analisis["staging"][0m will be created
+[0m  [32m+[0m[0m resource "kubernetes_role_binding" "analisis" {
+      [32m+[0m[0m id = (known after apply)
+
+      [32m+[0m[0m metadata {
+          [32m+[0m[0m generation       = (known after apply)
+          [32m+[0m[0m name             = "analisis-rollouts"
+          [32m+[0m[0m namespace        = "sa-staging"
+          [32m+[0m[0m resource_version = (known after apply)
+          [32m+[0m[0m uid              = (known after apply)
+        }
+
+      [32m+[0m[0m role_ref {
+          [32m+[0m[0m api_group = "rbac.authorization.k8s.io"
+          [32m+[0m[0m kind      = "Role"
+          [32m+[0m[0m name      = "ejecutor-de-analisis"
+        }
+
+      [32m+[0m[0m subject {
+          [32m+[0m[0m api_group = (known after apply)
+          [32m+[0m[0m kind      = "ServiceAccount"
+          [32m+[0m[0m name      = "analisis-rollouts"
+          [32m+[0m[0m namespace = "sa-staging"
+        }
+    }
+
+[1m  # kubernetes_role_binding.aplicador["prod"][0m will be created
+[0m  [32m+[0m[0m resource "kubernetes_role_binding" "aplicador" {
+      [32m+[0m[0m id = (known after apply)
+
+      [32m+[0m[0m metadata {
+          [32m+[0m[0m generation       = (known after apply)
+          [32m+[0m[0m name             = "argocd-aplicador"
+          [32m+[0m[0m namespace        = "sa-prod"
+          [32m+[0m[0m resource_version = (known after apply)
+          [32m+[0m[0m uid              = (known after apply)
+        }
+
+      [32m+[0m[0m role_ref {
+          [32m+[0m[0m api_group = "rbac.authorization.k8s.io"
+          [32m+[0m[0m kind      = "Role"
+          [32m+[0m[0m name      = "aplicador-de-cargas"
+        }
+
+      [32m+[0m[0m subject {
+          [32m+[0m[0m api_group = (known after apply)
+          [32m+[0m[0m kind      = "ServiceAccount"
+          [32m+[0m[0m name      = "argocd-application-controller"
+          [32m+[0m[0m namespace = "argocd"
+        }
+    }
+
+[1m  # kubernetes_role_binding.aplicador["staging"][0m will be created
+[0m  [32m+[0m[0m resource "kubernetes_role_binding" "aplicador" {
+      [32m+[0m[0m id = (known after apply)
+
+      [32m+[0m[0m metadata {
+          [32m+[0m[0m generation       = (known after apply)
+          [32m+[0m[0m name             = "argocd-aplicador"
+          [32m+[0m[0m namespace        = "sa-staging"
+          [32m+[0m[0m resource_version = (known after apply)
+          [32m+[0m[0m uid              = (known after apply)
+        }
+
+      [32m+[0m[0m role_ref {
+          [32m+[0m[0m api_group = "rbac.authorization.k8s.io"
+          [32m+[0m[0m kind      = "Role"
+          [32m+[0m[0m name      = "aplicador-de-cargas"
+        }
+
+      [32m+[0m[0m subject {
+          [32m+[0m[0m api_group = (known after apply)
+          [32m+[0m[0m kind      = "ServiceAccount"
+          [32m+[0m[0m name      = "argocd-application-controller"
+          [32m+[0m[0m namespace = "argocd"
+        }
+    }
+
+[1m  # kubernetes_role_binding.lector["prod"][0m will be created
+[0m  [32m+[0m[0m resource "kubernetes_role_binding" "lector" {
+      [32m+[0m[0m id = (known after apply)
+
+      [32m+[0m[0m metadata {
+          [32m+[0m[0m generation       = (known after apply)
+          [32m+[0m[0m name             = "pipeline-lector"
+          [32m+[0m[0m namespace        = "sa-prod"
+          [32m+[0m[0m resource_version = (known after apply)
+          [32m+[0m[0m uid              = (known after apply)
+        }
+
+      [32m+[0m[0m role_ref {
+          [32m+[0m[0m api_group = "rbac.authorization.k8s.io"
+          [32m+[0m[0m kind      = "Role"
+          [32m+[0m[0m name      = "solo-lectura"
+        }
+
+      [32m+[0m[0m subject {
+          [32m+[0m[0m api_group = (known after apply)
+          [32m+[0m[0m kind      = "ServiceAccount"
+          [32m+[0m[0m name      = "pipeline-lector"
+          [32m+[0m[0m namespace = "sa-prod"
+        }
+    }
+
+[1m  # kubernetes_role_binding.lector["staging"][0m will be created
+[0m  [32m+[0m[0m resource "kubernetes_role_binding" "lector" {
+      [32m+[0m[0m id = (known after apply)
+
+      [32m+[0m[0m metadata {
+          [32m+[0m[0m generation       = (known after apply)
+          [32m+[0m[0m name             = "pipeline-lector"
+          [32m+[0m[0m namespace        = "sa-staging"
+          [32m+[0m[0m resource_version = (known after apply)
+          [32m+[0m[0m uid              = (known after apply)
+        }
+
+      [32m+[0m[0m role_ref {
+          [32m+[0m[0m api_group = "rbac.authorization.k8s.io"
+          [32m+[0m[0m kind      = "Role"
+          [32m+[0m[0m name      = "solo-lectura"
+        }
+
+      [32m+[0m[0m subject {
+          [32m+[0m[0m api_group = (known after apply)
+          [32m+[0m[0m kind      = "ServiceAccount"
+          [32m+[0m[0m name      = "pipeline-lector"
+          [32m+[0m[0m namespace = "sa-staging"
+        }
+    }
+
+[1m  # kubernetes_service_account.analisis["prod"][0m will be created
+[0m  [32m+[0m[0m resource "kubernetes_service_account" "analisis" {
+      [32m+[0m[0m automount_service_account_token = true
+      [32m+[0m[0m default_secret_name             = (known after apply)
+      [32m+[0m[0m id                              = (known after apply)
+
+      [32m+[0m[0m metadata {
+          [32m+[0m[0m generation       = (known after apply)
+          [32m+[0m[0m name             = "analisis-rollouts"
+          [32m+[0m[0m namespace        = "sa-prod"
+          [32m+[0m[0m resource_version = (known after apply)
+          [32m+[0m[0m uid              = (known after apply)
+        }
+    }
+
+[1m  # kubernetes_service_account.analisis["staging"][0m will be created
+[0m  [32m+[0m[0m resource "kubernetes_service_account" "analisis" {
+      [32m+[0m[0m automount_service_account_token = true
+      [32m+[0m[0m default_secret_name             = (known after apply)
+      [32m+[0m[0m id                              = (known after apply)
+
+      [32m+[0m[0m metadata {
+          [32m+[0m[0m generation       = (known after apply)
+          [32m+[0m[0m name             = "analisis-rollouts"
+          [32m+[0m[0m namespace        = "sa-staging"
+          [32m+[0m[0m resource_version = (known after apply)
+          [32m+[0m[0m uid              = (known after apply)
+        }
+    }
+
+[1m  # kubernetes_service_account.argocd_aplicador["prod"][0m will be created
+[0m  [32m+[0m[0m resource "kubernetes_service_account" "argocd_aplicador" {
+      [32m+[0m[0m automount_service_account_token = true
+      [32m+[0m[0m default_secret_name             = (known after apply)
+      [32m+[0m[0m id                              = (known after apply)
+
+      [32m+[0m[0m metadata {
+          [32m+[0m[0m generation       = (known after apply)
+          [32m+[0m[0m name             = "argocd-aplicador"
+          [32m+[0m[0m namespace        = "sa-prod"
+          [32m+[0m[0m resource_version = (known after apply)
+          [32m+[0m[0m uid              = (known after apply)
+        }
+    }
+
+[1m  # kubernetes_service_account.argocd_aplicador["staging"][0m will be created
+[0m  [32m+[0m[0m resource "kubernetes_service_account" "argocd_aplicador" {
+      [32m+[0m[0m automount_service_account_token = true
+      [32m+[0m[0m default_secret_name             = (known after apply)
+      [32m+[0m[0m id                              = (known after apply)
+
+      [32m+[0m[0m metadata {
+          [32m+[0m[0m generation       = (known after apply)
+          [32m+[0m[0m name             = "argocd-aplicador"
+          [32m+[0m[0m namespace        = "sa-staging"
+          [32m+[0m[0m resource_version = (known after apply)
+          [32m+[0m[0m uid              = (known after apply)
+        }
+    }
+
+[1m  # kubernetes_service_account.pipeline_lector["prod"][0m will be created
+[0m  [32m+[0m[0m resource "kubernetes_service_account" "pipeline_lector" {
+      [32m+[0m[0m automount_service_account_token = true
+      [32m+[0m[0m default_secret_name             = (known after apply)
+      [32m+[0m[0m id                              = (known after apply)
+
+      [32m+[0m[0m metadata {
+          [32m+[0m[0m generation       = (known after apply)
+          [32m+[0m[0m name             = "pipeline-lector"
+          [32m+[0m[0m namespace        = "sa-prod"
+          [32m+[0m[0m resource_version = (known after apply)
+          [32m+[0m[0m uid              = (known after apply)
+        }
+    }
+
+[1m  # kubernetes_service_account.pipeline_lector["staging"][0m will be created
+[0m  [32m+[0m[0m resource "kubernetes_service_account" "pipeline_lector" {
+      [32m+[0m[0m automount_service_account_token = true
+      [32m+[0m[0m default_secret_name             = (known after apply)
+      [32m+[0m[0m id                              = (known after apply)
+
+      [32m+[0m[0m metadata {
+          [32m+[0m[0m generation       = (known after apply)
+          [32m+[0m[0m name             = "pipeline-lector"
+          [32m+[0m[0m namespace        = "sa-staging"
+          [32m+[0m[0m resource_version = (known after apply)
+          [32m+[0m[0m uid              = (known after apply)
+        }
+    }
+
+[1mPlan:[0m 24 to add, 0 to change, 0 to destroy.
+[0m
+Changes to Outputs:
+  [32m+[0m[0m cuentas_de_servicio = {
+      [32m+[0m[0m prod    = {
+          [32m+[0m[0m analisis  = "analisis-rollouts (ejecuta los AnalysisRun del canary)"
+          [32m+[0m[0m aplicador = "argocd-aplicador (escribe cargas: solo ArgoCD)"
+          [32m+[0m[0m lector    = "pipeline-lector (solo lectura: el pipeline no despliega)"
+        }
+      [32m+[0m[0m staging = {
+          [32m+[0m[0m analisis  = "analisis-rollouts (ejecuta los AnalysisRun del canary)"
+          [32m+[0m[0m aplicador = "argocd-aplicador (escribe cargas: solo ArgoCD)"
+          [32m+[0m[0m lector    = "pipeline-lector (solo lectura: el pipeline no despliega)"
+        }
+    }
+  [32m+[0m[0m namespaces          = {
+      [32m+[0m[0m prod    = "sa-prod"
+      [32m+[0m[0m staging = "sa-staging"
+    }
+  [32m+[0m[0m recordatorio        = "Terraform administra namespaces, cuotas, limites y RBAC. Las cargas de trabajo las aplica ArgoCD desde el repositorio de manifiestos."
+[0m[1mkubernetes_namespace.ambientes["staging"]: Creating...[0m[0m
+[0m[1mkubernetes_namespace.ambientes["prod"]: Creating...[0m[0m
+[0m[1mkubernetes_namespace.ambientes["staging"]: Creation complete after 2s [id=sa-staging][0m
+[0m[1mkubernetes_namespace.ambientes["prod"]: Creation complete after 2s [id=sa-prod][0m
+[0m[1mkubernetes_service_account.pipeline_lector["staging"]: Creating...[0m[0m
+[0m[1mkubernetes_service_account.argocd_aplicador["staging"]: Creating...[0m[0m
+[0m[1mkubernetes_resource_quota.cuota["staging"]: Creating...[0m[0m
+[0m[1mkubernetes_resource_quota.cuota["prod"]: Creating...[0m[0m
+[0m[1mkubernetes_role.analisis["prod"]: Creating...[0m[0m
+[0m[1mkubernetes_service_account.analisis["staging"]: Creating...[0m[0m
+[0m[1mkubernetes_role.aplicador["prod"]: Creating...[0m[0m
+[0m[1mkubernetes_role.aplicador["staging"]: Creating...[0m[0m
+[0m[1mkubernetes_service_account.pipeline_lector["prod"]: Creating...[0m[0m
+[0m[1mkubernetes_role.lector["prod"]: Creating...[0m[0m
+[0m[1mkubernetes_role.lector["prod"]: Creation complete after 1s [id=sa-prod/solo-lectura][0m
+[0m[1mkubernetes_service_account.analisis["prod"]: Creating...[0m[0m
+[0m[1mkubernetes_service_account.analisis["staging"]: Creation complete after 1s [id=sa-staging/analisis-rollouts][0m
+[0m[1mkubernetes_role.analisis["prod"]: Creation complete after 1s [id=sa-prod/ejecutor-de-analisis][0m
+[0m[1mkubernetes_resource_quota.cuota["prod"]: Creation complete after 1s [id=sa-prod/sa-prod-cuota][0m
+[0m[1mkubernetes_service_account.pipeline_lector["prod"]: Creation complete after 1s [id=sa-prod/pipeline-lector][0m
+[0m[1mkubernetes_role.aplicador["prod"]: Creation complete after 1s [id=sa-prod/aplicador-de-cargas][0m
+[0m[1mkubernetes_resource_quota.cuota["staging"]: Creation complete after 1s [id=sa-staging/sa-staging-cuota][0m
+[0m[1mkubernetes_service_account.argocd_aplicador["prod"]: Creating...[0m[0m
+[0m[1mkubernetes_role.lector["staging"]: Creating...[0m[0m
+[0m[1mkubernetes_role.aplicador["staging"]: Creation complete after 2s [id=sa-staging/aplicador-de-cargas][0m
+[0m[1mkubernetes_service_account.argocd_aplicador["staging"]: Creation complete after 2s [id=sa-staging/argocd-aplicador][0m
+[0m[1mkubernetes_service_account.pipeline_lector["staging"]: Creation complete after 2s [id=sa-staging/pipeline-lector][0m
+[0m[1mkubernetes_limit_range.limites["staging"]: Creating...[0m[0m
+[0m[1mkubernetes_role.analisis["staging"]: Creating...[0m[0m
+[0m[1mkubernetes_limit_range.limites["prod"]: Creating...[0m[0m
+[0m[1mkubernetes_role_binding.aplicador["prod"]: Creating...[0m[0m
+[0m[1mkubernetes_role_binding.aplicador["staging"]: Creating...[0m[0m
+[0m[1mkubernetes_service_account.analisis["prod"]: Creation complete after 1s [id=sa-prod/analisis-rollouts][0m
+[0m[1mkubernetes_role.analisis["staging"]: Creation complete after 0s [id=sa-staging/ejecutor-de-analisis][0m
+[0m[1mkubernetes_role.lector["staging"]: Creation complete after 1s [id=sa-staging/solo-lectura][0m
+[0m[1mkubernetes_role_binding.analisis["prod"]: Creating...[0m[0m
+[0m[1mkubernetes_role_binding.analisis["staging"]: Creating...[0m[0m
+[0m[1mkubernetes_role_binding.lector["prod"]: Creating...[0m[0m
+[0m[1mkubernetes_role_binding.lector["staging"]: Creating...[0m[0m
+[0m[1mkubernetes_service_account.argocd_aplicador["prod"]: Creation complete after 1s [id=sa-prod/argocd-aplicador][0m
+[0m[1mkubernetes_limit_range.limites["staging"]: Creation complete after 0s [id=sa-staging/sa-staging-limites][0m
+[0m[1mkubernetes_limit_range.limites["prod"]: Creation complete after 0s [id=sa-prod/sa-prod-limites][0m
+[0m[1mkubernetes_role_binding.aplicador["staging"]: Creation complete after 0s [id=sa-staging/argocd-aplicador][0m
+[0m[1mkubernetes_role_binding.aplicador["prod"]: Creation complete after 0s [id=sa-prod/argocd-aplicador][0m
+[0m[1mkubernetes_role_binding.lector["staging"]: Creation complete after 0s [id=sa-staging/pipeline-lector][0m
+[0m[1mkubernetes_role_binding.analisis["prod"]: Creation complete after 0s [id=sa-prod/analisis-rollouts][0m
+[0m[1mkubernetes_role_binding.analisis["staging"]: Creation complete after 1s [id=sa-staging/analisis-rollouts][0m
+[0m[1mkubernetes_role_binding.lector["prod"]: Creation complete after 1s [id=sa-prod/pipeline-lector][0m
+[0m[1m[32m
+Apply complete! Resources: 24 added, 0 changed, 0 destroyed.
+[0m[0m[1m[32m
+Outputs:
+
+[0mcuentas_de_servicio = {
+  "prod" = {
+    "analisis" = "analisis-rollouts (ejecuta los AnalysisRun del canary)"
+    "aplicador" = "argocd-aplicador (escribe cargas: solo ArgoCD)"
+    "lector" = "pipeline-lector (solo lectura: el pipeline no despliega)"
+  }
+  "staging" = {
+    "analisis" = "analisis-rollouts (ejecuta los AnalysisRun del canary)"
+    "aplicador" = "argocd-aplicador (escribe cargas: solo ArgoCD)"
+    "lector" = "pipeline-lector (solo lectura: el pipeline no despliega)"
+  }
+}
+namespaces = {
+  "prod" = "sa-prod"
+  "staging" = "sa-staging"
+}
+recordatorio = "Terraform administra namespaces, cuotas, limites y RBAC. Las cargas de trabajo las aplica ArgoCD desde el repositorio de manifiestos."

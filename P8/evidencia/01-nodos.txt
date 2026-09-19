@@ -1,0 +1,5 @@
+NAME                                           STATUS   ROLES    AGE   VERSION
+gke-sa-p8-cluster-default-pool-a07ecc68-0j8m   Ready    <none>   43h   v1.35.7-gke.1222000
+gke-sa-p8-cluster-default-pool-a07ecc68-8n87   Ready    <none>   43h   v1.35.7-gke.1222000
+gke-sa-p8-cluster-default-pool-a07ecc68-bshf   Ready    <none>   43h   v1.35.7-gke.1222000
+gke-sa-p8-cluster-default-pool-a07ecc68-gv3h   Ready    <none>   43h   v1.35.7-gke.1222000

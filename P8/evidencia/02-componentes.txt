@@ -1,0 +1,14 @@
+NAME                                             READY   STATUS    RESTARTS   AGE
+argocd-application-controller-0                  1/1     Running   0          42h
+argocd-dex-server-8666767789-57vwf               1/1     Running   0          42h
+argocd-notifications-controller-797f48b4-t8pz5   1/1     Running   0          42h
+argocd-redis-6fd5864464-62pcz                    1/1     Running   0          42h
+argocd-repo-server-c4977564f-stmrg               1/1     Running   0          42h
+argocd-server-59bd8b5c4-n87jv                    1/1     Running   0          42h
+NAME                             READY   STATUS    RESTARTS   AGE
+argo-rollouts-69645d4879-t4d2n   1/1     Running   0          42h
+NAME                                             READY   STATUS    RESTARTS   AGE
+kyverno-admission-controller-86cbbb5545-vgc78    1/1     Running   0          42h
+kyverno-background-controller-5546cb5b76-zwdgl   1/1     Running   0          42h
+kyverno-cleanup-controller-f947f9769-888zd       1/1     Running   0          42h
+kyverno-reports-controller-79d68cccbb-ngb44      1/1     Running   0          42h

@@ -6,22 +6,18 @@
 
 ## Tabla de enlaces
 
-> **Instrucción para completar:** reemplaza cada `PENDIENTE` por el enlace
-> real. La rúbrica califica con cero cualquier ítem cuyo enlace esté
-> ausente, roto o requiera autenticación, sin búsqueda adicional en el
-> repositorio.
-
 | Ítem | Enlace o dato |
 |---|---|
 | Repositorio GitOps | https://github.com/susanpamela2520/Pr-cticas-SA-B-201612218-gitops |
-| Aplicación en ArgoCD | `sa-platform-gateway` en el namespace `argocd` |
-| Ejecución exitosa del pipeline | PENDIENTE — URL del run de Actions |
-| Reversión automática | PENDIENTE — URL del run y del Rollout |
-| Despliegue rechazado por política | PENDIENTE — URL de la evidencia |
-| Bloqueo por vulnerabilidad crítica | PENDIENTE — URL del PR bloqueado |
-| Imagen firmada | `ghcr.io/susanpamela2520/pr-cticas-sa-b-201612218/api-gateway:v1.0.0` |
-| Reporte de prueba de carga | `P8/tests/load/reporte-carga-canary.json` |
-| Video demostrativo | PENDIENTE — URL y minutaje |
+| Aplicación en ArgoCD | `sa-platform-gateway` en el namespace `argocd` — estado `Synced` y `Healthy` |
+| Sistema en producción | http://136.111.98.109:8080/health |
+| Ejecución exitosa del pipeline | https://github.com/susanpamela2520/Pr-cticas-SA-B-201612218/actions/runs/35426560910 |
+| Bloqueo por vulnerabilidad crítica | https://github.com/susanpamela2520/Pr-cticas-SA-B-201612218/actions/runs/35424231424 |
+| Pipeline de la versión defectuosa | https://github.com/susanpamela2520/Pr-cticas-SA-B-201612218/actions/runs/35426900000 |
+| Pull Requests de promoción | https://github.com/susanpamela2520/Pr-cticas-SA-B-201612218-gitops/pulls?q=is%3Apr |
+| Despliegue rechazado por política | `P8/img/12-pod-rechazado.png` |
+| Imagen firmada | `ghcr.io/susanpamela2520/pr-cticas-sa-b-201612218/api-gateway:v1.1.9` |
+| Reversión del incidente | `P8/img/28-rollout-revertido.png` |
 
 ---
 

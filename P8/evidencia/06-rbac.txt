@@ -1,0 +1,15 @@
+NAME                               AGE
+serviceaccount/analisis-rollouts   6m53s
+serviceaccount/argocd-aplicador    6m53s
+serviceaccount/default             6m55s
+serviceaccount/pipeline-lector     6m54s
+
+NAME                                                  CREATED AT
+role.rbac.authorization.k8s.io/aplicador-de-cargas    2026-09-19T00:13:22Z
+role.rbac.authorization.k8s.io/ejecutor-de-analisis   2026-09-19T00:13:22Z
+role.rbac.authorization.k8s.io/solo-lectura           2026-09-19T00:13:22Z
+
+NAME                                                      ROLE                        AGE
+rolebinding.rbac.authorization.k8s.io/analisis-rollouts   Role/ejecutor-de-analisis   6m54s
+rolebinding.rbac.authorization.k8s.io/argocd-aplicador    Role/aplicador-de-cargas    6m54s
+rolebinding.rbac.authorization.k8s.io/pipeline-lector     Role/solo-lectura           6m54s
