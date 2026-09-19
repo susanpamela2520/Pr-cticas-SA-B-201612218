@@ -16,5 +16,8 @@
     "@types/node": "^20.12.7",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.4.5"
+  },
+  "overrides": {
+    "tar": "^7.5.19"
   }
 }
