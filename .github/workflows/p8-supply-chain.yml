@@ -108,7 +108,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Construir la imagen localmente para analizarla
-        run: docker build -t analisis-local:${{ github.sha }} P5/${{ env.SERVICIO }}
+        run: docker build --no-cache --pull -t analisis-local:${{ github.sha }} P5/${{ env.SERVICIO }}
 
       # Primer paso informativo: deja el reporte completo como evidencia.
       - name: Reporte completo de vulnerabilidades
