@@ -349,18 +349,18 @@ jobs:
           echo "Version anterior:"
           grep "image:" "$ARCHIVO"
 
-          # Reemplaza unicamente la etiqueta, conservando la ruta.
           sed -i "s|\(image: ${IMAGEN}\):.*|\1:${VERSION}|" "$ARCHIVO"
 
           echo "Version nueva:"
           grep "image:" "$ARCHIVO"
 
-          # Si el sed no cambio nada, algo esta mal y no tiene sentido
-          # abrir un PR vacio.
-          git diff --quiet "$ARCHIVO" && {
+          # git diff --quiet devuelve 0 si NO hay cambios: ese es el caso de error.
+          if git diff --quiet "$ARCHIVO"; then
             echo "::error::La etiqueta no cambio. Revisa que la ruta de la imagen coincida."
             exit 1
-          }
+          fi
+
+          echo "Etiqueta actualizada correctamente."
 
       - name: Abrir el Pull Request
         uses: peter-evans/create-pull-request@v7
