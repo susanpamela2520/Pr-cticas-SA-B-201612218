@@ -9,8 +9,9 @@ export function crearApp(): Application {
   const COMENTARIOS_URL = process.env.COMENTARIOS_SERVICE_URL || 'http://localhost:3002';
   const NOTIFICACIONES_URL = process.env.NOTIFICACIONES_SERVICE_URL || 'http://localhost:8002';
 
-  app.get('/health', (_req, res) => res.json({ status: 'ok', servicio: 'api-gateway' }));
-
+    // VERSION DEFECTUOSA — introducida deliberadamente para la P8.
+  // Se revierte con git revert tras capturar la evidencia.
+  app.get('/health', (_req, res) => res.status(500).json({ status: 'error', servicio: 'api-gateway' }));
   app.use('/api/auth', createProxyMiddleware({ target: AUTH_URL, changeOrigin: true }));
   app.use('/graphql/auth', createProxyMiddleware({ target: AUTH_URL, changeOrigin: true, pathRewrite: { '^/graphql/auth': '/graphql' } }));
 
