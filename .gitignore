@@ -5,3 +5,11 @@ values-secrets.yaml
 secretos.env
 pub-cert.pem
 gcp-key.json
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+*.tfvars
+!*ejemplo.tfvars
