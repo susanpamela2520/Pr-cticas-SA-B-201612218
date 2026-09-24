@@ -1,0 +1,7 @@
+Prueba de humo contra http://136.114.139.211:8080
+
+  OK    El gateway responde a /health (HTTP 200)
+  OK    Ruta inexistente devuelve 404 (HTTP 404)
+  OK    Endpoint protegido exige sesion (HTTP 401)
+
+Prueba de humo superada.

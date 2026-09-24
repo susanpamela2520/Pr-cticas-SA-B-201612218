@@ -1,0 +1,22 @@
+
+--- 1. Registro de usuario (auth-service)
+  OK    Usuario creado
+
+--- 2. Autenticacion y emision de JWT
+  OK    Sesion iniciada
+  OK    Cookie HttpOnly de sesion recibida
+
+--- 3. Creacion de ticket (tickets-service + PostgreSQL)
+  OK    Ticket creado (d982db96-af62-4fda-9ede-86028a428293)
+
+--- 4. Creacion de comentario (comentarios-service)
+  OK    Comentario creado
+
+--- 5. Listado de tickets
+  OK    Listado accesible
+
+--- 6. Resolucion de ticket (publica en RabbitMQ)
+  OK    Ticket resuelto, evento publicado
+
+Prueba de integracion superada: los 4 microservicios, PostgreSQL y
+RabbitMQ respondieron correctamente.

@@ -5,7 +5,7 @@
 **Repositorio de código:** https://github.com/susanpamela2520/Pr-cticas-SA-B-201612218
 **Repositorio GitOps:** https://github.com/susanpamela2520/Pr-cticas-SA-B-201612218-gitops
 **Clúster:** `sa-p8-cluster` (GKE, `us-central1-a`)
-**Sistema en producción:** http://136.111.98.109:8080/health
+**Sistema en producción:** http://136.114.139.211:8080/health
 
 ---
 
@@ -309,7 +309,7 @@ versión defectuosa por `selfHeal`.
 
 **Archivo:** `33-sistema-publico.png`
 
-Respuesta desde internet a `http://136.111.98.109:8080/health`:
+Respuesta desde internet a `http://136.114.139.211:8080/health`:
 
 ```json
 {"status":"ok","servicio":"api-gateway"}

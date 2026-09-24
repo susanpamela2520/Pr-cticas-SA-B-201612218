@@ -1,0 +1,135 @@
+================================================================
+ VERIFICACION PRACTICA 8 - v2.0
+ Carnet: 201612218        Fecha: 2026-09-19 10:57
+ Hash del script: b7d118f15b7d9b1c
+================================================================
+
+--- 0. Herramientas y contexto (debe verificarlo el auxiliar)
+  [0;33m[AVISO][0m Herramientas ausentes: jq trivy cosign argocd  (sus verificaciones saldran en cero)
+  Contexto de kubectl : gke_p6-sa2s2026_us-central1-a_sa-p8-cluster
+  Servidor            : Kubernetes control plane is running at https://104.198.43.121
+  Usuario de ArgoCD   : sin sesion
+  [0;32m[OK][0m    Acceso al cluster confirmado
+
+--- 1. Repositorios
+  [0;32m[OK][0m    Repositorio de codigo accesible
+  [0;32m[OK][0m    Repositorio GitOps accesible
+  [0;32m[OK][0m    Carpeta /P8 presente
+  [0;32m[OK][0m    README de entrega presente
+
+--- ELIMINATORIO: ausencia de despliegue directo (seccion 8.1)
+  [0;32m[OK][0m    Ningun workflow despliega directamente ni almacena kubeconfig
+
+--- 2.1 Infraestructura como codigo con Terraform (8 pts)
+  [0;32m[OK][0m    Codigo Terraform encontrado en 1 directorio(s)
+  [0;32m[OK][0m    terraform validate correcto
+  [0;32m[OK][0m    Declara namespaces, cuotas o limites
+  [0;32m[OK][0m    Declara RBAC
+  >> 2.1 = 8 / 8
+
+--- 2.2 Empaquetado con Helm (8 pts)
+  [0;32m[OK][0m    8 chart(s): 1 raiz/raices y 7 subchart(s)
+  [0;32m[OK][0m    Multiples servicios empaquetados
+  [0;32m[OK][0m    helm lint correcto en los charts raiz
+  [0;32m[OK][0m    Valores diferenciados por ambiente (7 archivos)
+  [0;32m[OK][0m    helm lint integrado en el pipeline
+  >> 2.2 = 8 / 8
+
+--- 2.3 GitOps con ArgoCD (14 pts)
+  [0;33m[AVISO][0m Sin sesion de argocd: se consulto el CRD Application directamente
+Fix_Script_p8.sh: line 200: jq: command not found
+Fix_Script_p8.sh: line 201: jq: command not found
+Fix_Script_p8.sh: line 202: jq: command not found
+Fix_Script_p8.sh: line 203: jq: command not found
+  sync=  health=  automated=
+  repoURL=
+  [0;31m[FALLA][0m Aplicacion NO sincronizada
+  [0;31m[FALLA][0m Aplicacion NO saludable
+  [0;31m[FALLA][0m El repoURL NO coincide con el repositorio GitOps entregado
+  [0;32m[OK][0m    El pipeline genera un Pull Request al repositorio GitOps
+  >> 2.3 = 7 / 14
+
+--- 2.4 Entrega progresiva y reversion automatica (14 pts)
+  [0;32m[OK][0m    Rollout encontrado: api-gateway
+Fix_Script_p8.sh: line 231: jq: command not found
+  Estrategia:    pasos declarados: 0
+  [0;31m[FALLA][0m Menos de tres pasos de promocion (setWeight: 0)
+  [0;32m[OK][0m    AnalysisTemplate definido (1)
+  [0;31m[FALLA][0m La promocion NO depende del analisis
+Fix_Script_p8.sh: line 246: jq: command not found
+  [0;31m[FALLA][0m Sin evidencia de reversion en el cluster -> EXIGIR LA DEMOSTRACION EN VIVO
+
+Name:            api-gateway
+Namespace:       sa-prod
+Status:          [32m✔[0m Healthy
+Strategy:        Canary
+  Step:          6/6
+  SetWeight:     100
+  ActualWeight:  100
+Images:          ghcr.io/susanpamela2520/pr-cticas-sa-b-201612218/api-gateway:v1.1.9 ([32mstable[0m)
+Replicas:
+  Desired:       4
+  Current:       4
+  Updated:       4
+  Ready:         4
+  Available:     4
+
+NAME                                                              KIND         STATUS          AGE    INFO
+⟳ api-gateway                                                     Rollout      [32m✔[0m Healthy       15h    
+├──# revision:7                                                                                       
+│  └──⧉ [32mapi-gateway-7bb6568d7d[0m                                    ReplicaSet   [32m✔[0m Healthy       3h10m  [32mstable[0m
+│     ├──□ api-gateway-7bb6568d7d-4h4f6                           Pod          [32m✔[0m Running       3h3m   ready:1/1
+│     ├──□ api-gateway-7bb6568d7d-l47hs                           Pod          [32m✔[0m Running       3h3m   ready:1/1
+│     ├──□ api-gateway-7bb6568d7d-6z4qd                           Pod          [32m✔[0m Running       3h3m   ready:1/1
+│     └──□ api-gateway-7bb6568d7d-pz4cz                           Pod          [32m✔[0m Running       3h3m   ready:1/1
+├──# revision:6                                                                                       
+│  ├──⧉ api-gateway-5f89ffc996                                    ReplicaSet   [0m•[0m ScaledDown    153m   
+│  └──α [0mapi-gateway-5f89ffc996-6[0m                                  AnalysisRun  [31m✖[0m Failed        153m   [31m✖[0m 1,[33m?[0m 2
+│     ├──⊞ [0m3f9eab86-7a51-44f1-9751-50631b81b556.tasa-de-exito.1[0m   Job          [33m?[0m Inconclusive  153m   
+│     ├──⊞ [0m3f9eab86-7a51-44f1-9751-50631b81b556.latencia-p95.1[0m    Job          [33m?[0m Inconclusive  153m   
+│     └──⊞ [0m3f9eab86-7a51-44f1-9751-50631b81b556.disponibilidad.1[0m  Job          [31m✖[0m Failed        153m   
+├──# revision:4                                                                                       
+  >> 2.4 = 6 / 14
+
+--- 2.5 Validacion automatizada (8 pts)
+  [0;32m[OK][0m    Prueba de carga presente
+  [0;32m[OK][0m    Umbrales definidos
+  [0;32m[OK][0m    Pruebas de humo o integracion presentes
+  [0;31m[FALLA][0m El analisis no invoca pruebas reales
+  >> 2.5 = 6 / 8
+
+--- 2.6 Cadena de suministro y politicas (8 pts)
+  [0;32m[OK][0m    Trivy configurado para bloquear ante CVE criticas
+  [0;31m[FALLA][0m Imagen sin firma valida (o registro privado sin docker login)
+  [0;33m[AVISO][0m Reintente a mano: cosign verify ghcr.io/susanpamela2520/pr-cticas-sa-b-201612218/api-gateway:v1.1.9 --certificate-identity-regexp 'https://github.com/susanpamela2520/Pr-cticas-SA-B-201612218/.*' --certificate-oidc-issuer https://token.actions.githubusercontent.com
+  Politicas activas: 3
+  [0;32m[OK][0m    Tres o mas politicas activas
+  [0;32m[OK][0m    Secretos gestionados de forma segura
+  [0;32m[OK][0m    Sin secretos en texto plano
+  >> 2.6 = 6 / 8
+
+--- Antipatrones (informativo, penalizacion manual)
+  [0;31m[FALLA][0m Uso de la etiqueta latest en manifiestos (-5 pts segun seccion 8)
+  [0;32m[OK][0m    Se declaran limites de recursos
+
+================================================================
+ RESUMEN - carnet 201612218
+================================================================
+  2.1 Terraform ..............  8 / 8
+  2.2 Helm ...................  8 / 8
+  2.3 GitOps con ArgoCD ......  7 / 14
+  2.4 Entrega progresiva .....  6 / 14
+  2.5 Validacion automatizada   6 / 8
+  2.6 Seguridad y politicas ..  6 / 8
+  ------------------------------------
+  CONOCIMIENTO ............... 41 / 60
+
+  Pendiente de evaluacion presencial: 40 pts
+    1.1 Documentacion (8)   1.2 Diagrama (8)
+    1.3 Informe de incidente (10)   1.4 Preguntas teoricas (14)
+
+  [0;31mREQUISITOS ELIMINATORIOS INCUMPLIDOS:[0m no-synced no-healthy
+  Revisar la seccion 8.1 del enunciado antes de asignar nota.
+
+  Duracion: 66s    Reporte: reporte_p8_201612218.txt
+================================================================

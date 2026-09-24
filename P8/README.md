@@ -10,7 +10,7 @@
 |---|---|
 | Repositorio GitOps | https://github.com/susanpamela2520/Pr-cticas-SA-B-201612218-gitops |
 | Aplicación en ArgoCD | `sa-platform-gateway` en el namespace `argocd` — estado `Synced` y `Healthy` |
-| Sistema en producción | http://136.111.98.109:8080/health |
+| Sistema en producción | http://136.114.139.211:8080/health |
 | Ejecución exitosa del pipeline | https://github.com/susanpamela2520/Pr-cticas-SA-B-201612218/actions/runs/35426560910 |
 | Bloqueo por vulnerabilidad crítica | https://github.com/susanpamela2520/Pr-cticas-SA-B-201612218/actions/runs/35424231424 |
 | Pipeline de la versión defectuosa | https://github.com/susanpamela2520/Pr-cticas-SA-B-201612218/actions/runs/35426900000 |
