@@ -1,0 +1,31 @@
+# ---------------------------------------------------------------------------
+# RESILIENCIA ANTE PERDIDA DE NODO
+#
+# Un PodDisruptionBudget no impide que un nodo caiga: impide que el drenaje
+# VOLUNTARIO de un nodo se lleve tantas replicas que el servicio deje de
+# responder. Kubernetes espera a que haya reemplazo antes de continuar.
+#
+# minAvailable en lugar de maxUnavailable porque expresa la garantia en los
+# terminos del servicio: cuantas replicas deben seguir atendiendo.
+# ---------------------------------------------------------------------------
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: api-gateway
+  namespace: sa-prod
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: api-gateway
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: auth-service
+  namespace: sa-prod
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: auth-service

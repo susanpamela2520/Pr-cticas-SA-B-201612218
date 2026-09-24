@@ -1,0 +1,1055 @@
+data.google_compute_default_service_account.nodos: Reading...
+data.google_client_config.actual: Reading...
+data.google_client_config.actual: Read complete after 0s [id=projects/"p6-sa2s2026"/regions/"us-central1"/zones/<null>]
+data.google_compute_default_service_account.nodos: Read complete after 1s [id=projects/p6-sa2s2026/serviceAccounts/156744545241-compute@developer.gserviceaccount.com]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # google_container_cluster.sa will be created
+  + resource "google_container_cluster" "sa" {
+      + cluster_ipv4_cidr                        = (known after apply)
+      + datapath_provider                        = (known after apply)
+      + default_max_pods_per_node                = (known after apply)
+      + deletion_protection                      = false
+      + enable_cilium_clusterwide_network_policy = false
+      + enable_intranode_visibility              = (known after apply)
+      + enable_kubernetes_alpha                  = false
+      + enable_l4_ilb_subsetting                 = false
+      + enable_legacy_abac                       = false
+      + enable_multi_networking                  = false
+      + enable_shielded_nodes                    = true
+      + endpoint                                 = (known after apply)
+      + id                                       = (known after apply)
+      + initial_node_count                       = 1
+      + label_fingerprint                        = (known after apply)
+      + location                                 = "us-central1-a"
+      + logging_service                          = (known after apply)
+      + master_version                           = (known after apply)
+      + monitoring_service                       = (known after apply)
+      + name                                     = "sa-p9-cluster"
+      + network                                  = "default"
+      + networking_mode                          = (known after apply)
+      + node_locations                           = (known after apply)
+      + node_version                             = (known after apply)
+      + operation                                = (known after apply)
+      + private_ipv6_google_access               = (known after apply)
+      + project                                  = (known after apply)
+      + remove_default_node_pool                 = true
+      + self_link                                = (known after apply)
+      + services_ipv4_cidr                       = (known after apply)
+      + subnetwork                               = (known after apply)
+      + tpu_ipv4_cidr_block                      = (known after apply)
+
+      + addons_config {
+          + cloudrun_config (known after apply)
+          + config_connector_config (known after apply)
+          + dns_cache_config (known after apply)
+          + gce_persistent_disk_csi_driver_config {
+              + enabled = true
+            }
+          + gcp_filestore_csi_driver_config (known after apply)
+          + gcs_fuse_csi_driver_config (known after apply)
+          + gke_backup_agent_config (known after apply)
+          + horizontal_pod_autoscaling (known after apply)
+          + http_load_balancing (known after apply)
+          + network_policy_config (known after apply)
+          + ray_operator_config (known after apply)
+          + stateful_ha_config (known after apply)
+        }
+
+      + authenticator_groups_config (known after apply)
+
+      + cluster_autoscaling (known after apply)
+
+      + confidential_nodes (known after apply)
+
+      + cost_management_config (known after apply)
+
+      + database_encryption (known after apply)
+
+      + default_snat_status (known after apply)
+
+      + gateway_api_config (known after apply)
+
+      + identity_service_config (known after apply)
+
+      + ip_allocation_policy (known after apply)
+
+      + logging_config (known after apply)
+
+      + master_auth (known after apply)
+
+      + master_authorized_networks_config (known after apply)
+
+      + mesh_certificates (known after apply)
+
+      + monitoring_config (known after apply)
+
+      + node_config (known after apply)
+
+      + node_pool (known after apply)
+
+      + node_pool_auto_config (known after apply)
+
+      + node_pool_defaults (known after apply)
+
+      + notification_config (known after apply)
+
+      + release_channel (known after apply)
+
+      + security_posture_config (known after apply)
+
+      + service_external_ips_config (known after apply)
+
+      + vertical_pod_autoscaling (known after apply)
+
+      + workload_identity_config (known after apply)
+    }
+
+  # google_container_node_pool.principal will be created
+  + resource "google_container_node_pool" "principal" {
+      + cluster                     = "sa-p9-cluster"
+      + id                          = (known after apply)
+      + initial_node_count          = (known after apply)
+      + instance_group_urls         = (known after apply)
+      + location                    = "us-central1-a"
+      + managed_instance_group_urls = (known after apply)
+      + max_pods_per_node           = (known after apply)
+      + name                        = "principal"
+      + name_prefix                 = (known after apply)
+      + node_count                  = 3
+      + node_locations              = (known after apply)
+      + operation                   = (known after apply)
+      + project                     = "p6-sa2s2026"
+      + version                     = (known after apply)
+
+      + management {
+          + auto_repair  = true
+          + auto_upgrade = false
+        }
+
+      + network_config (known after apply)
+
+      + node_config {
+          + disk_size_gb      = 50
+          + disk_type         = "pd-standard"
+          + effective_taints  = (known after apply)
+          + guest_accelerator = (known after apply)
+          + image_type        = (known after apply)
+          + labels            = {
+              + "sa-platform/pool" = "principal"
+            }
+          + local_ssd_count   = (known after apply)
+          + logging_variant   = (known after apply)
+          + machine_type      = "e2-standard-2"
+          + metadata          = (known after apply)
+          + min_cpu_platform  = (known after apply)
+          + oauth_scopes      = [
+              + "https://www.googleapis.com/auth/cloud-platform",
+            ]
+          + preemptible       = false
+          + service_account   = (known after apply)
+          + spot              = false
+
+          + confidential_nodes (known after apply)
+
+          + gcfs_config (known after apply)
+
+          + kubelet_config (known after apply)
+
+          + shielded_instance_config (known after apply)
+
+          + workload_metadata_config (known after apply)
+        }
+
+      + upgrade_settings (known after apply)
+    }
+
+  # google_storage_bucket_iam_member.velero will be created
+  + resource "google_storage_bucket_iam_member" "velero" {
+      + bucket = "sa-p9-respaldos-201612218"
+      + etag   = (known after apply)
+      + id     = (known after apply)
+      + member = "serviceAccount:156744545241-compute@developer.gserviceaccount.com"
+      + role   = "roles/storage.objectAdmin"
+    }
+
+  # helm_release.argo_rollouts will be created
+  + resource "helm_release" "argo_rollouts" {
+      + atomic                     = false
+      + chart                      = "argo-rollouts"
+      + cleanup_on_fail            = false
+      + create_namespace           = true
+      + dependency_update          = false
+      + disable_crd_hooks          = false
+      + disable_openapi_validation = false
+      + disable_webhooks           = false
+      + force_update               = false
+      + id                         = (known after apply)
+      + lint                       = false
+      + manifest                   = (known after apply)
+      + max_history                = 0
+      + metadata                   = (known after apply)
+      + name                       = "argo-rollouts"
+      + namespace                  = "argo-rollouts"
+      + pass_credentials           = false
+      + recreate_pods              = false
+      + render_subchart_notes      = true
+      + replace                    = false
+      + repository                 = "https://argoproj.github.io/argo-helm"
+      + reset_values               = false
+      + reuse_values               = false
+      + skip_crds                  = false
+      + status                     = "deployed"
+      + timeout                    = 300
+      + verify                     = false
+      + version                    = "2.38.2"
+      + wait                       = true
+      + wait_for_jobs              = false
+    }
+
+  # helm_release.argocd will be created
+  + resource "helm_release" "argocd" {
+      + atomic                     = false
+      + chart                      = "argo-cd"
+      + cleanup_on_fail            = false
+      + create_namespace           = true
+      + dependency_update          = false
+      + disable_crd_hooks          = false
+      + disable_openapi_validation = false
+      + disable_webhooks           = false
+      + force_update               = false
+      + id                         = (known after apply)
+      + lint                       = false
+      + manifest                   = (known after apply)
+      + max_history                = 0
+      + metadata                   = (known after apply)
+      + name                       = "argocd"
+      + namespace                  = "argocd"
+      + pass_credentials           = false
+      + recreate_pods              = false
+      + render_subchart_notes      = true
+      + replace                    = false
+      + repository                 = "https://argoproj.github.io/argo-helm"
+      + reset_values               = false
+      + reuse_values               = false
+      + skip_crds                  = false
+      + status                     = "deployed"
+      + timeout                    = 900
+      + verify                     = false
+      + version                    = "7.7.11"
+      + wait                       = true
+      + wait_for_jobs              = false
+
+      + set {
+          + name  = "configs.cm.timeout\\.reconciliation"
+          + value = "60s"
+            # (1 unchanged attribute hidden)
+        }
+      + set {
+          + name  = "server.service.type"
+          + value = "LoadBalancer"
+            # (1 unchanged attribute hidden)
+        }
+    }
+
+  # helm_release.kyverno will be created
+  + resource "helm_release" "kyverno" {
+      + atomic                     = false
+      + chart                      = "kyverno"
+      + cleanup_on_fail            = false
+      + create_namespace           = true
+      + dependency_update          = false
+      + disable_crd_hooks          = false
+      + disable_openapi_validation = false
+      + disable_webhooks           = false
+      + force_update               = false
+      + id                         = (known after apply)
+      + lint                       = false
+      + manifest                   = (known after apply)
+      + max_history                = 0
+      + metadata                   = (known after apply)
+      + name                       = "kyverno"
+      + namespace                  = "kyverno"
+      + pass_credentials           = false
+      + recreate_pods              = false
+      + render_subchart_notes      = true
+      + replace                    = false
+      + repository                 = "https://kyverno.github.io/kyverno"
+      + reset_values               = false
+      + reuse_values               = false
+      + skip_crds                  = false
+      + status                     = "deployed"
+      + timeout                    = 600
+      + verify                     = false
+      + version                    = "3.3.4"
+      + wait                       = true
+      + wait_for_jobs              = false
+    }
+
+  # helm_release.sealed_secrets will be created
+  + resource "helm_release" "sealed_secrets" {
+      + atomic                     = false
+      + chart                      = "sealed-secrets"
+      + cleanup_on_fail            = false
+      + create_namespace           = false
+      + dependency_update          = false
+      + disable_crd_hooks          = false
+      + disable_openapi_validation = false
+      + disable_webhooks           = false
+      + force_update               = false
+      + id                         = (known after apply)
+      + lint                       = false
+      + manifest                   = (known after apply)
+      + max_history                = 0
+      + metadata                   = (known after apply)
+      + name                       = "sealed-secrets"
+      + namespace                  = "kube-system"
+      + pass_credentials           = false
+      + recreate_pods              = false
+      + render_subchart_notes      = true
+      + replace                    = false
+      + repository                 = "https://bitnami-labs.github.io/sealed-secrets"
+      + reset_values               = false
+      + reuse_values               = false
+      + skip_crds                  = false
+      + status                     = "deployed"
+      + timeout                    = 600
+      + verify                     = false
+      + version                    = "2.16.1"
+      + wait                       = true
+      + wait_for_jobs              = false
+
+      + set {
+          + name  = "fullnameOverride"
+          + value = "sealed-secrets-controller"
+            # (1 unchanged attribute hidden)
+        }
+    }
+
+  # helm_release.velero will be created
+  + resource "helm_release" "velero" {
+      + atomic                     = false
+      + chart                      = "velero"
+      + cleanup_on_fail            = false
+      + create_namespace           = true
+      + dependency_update          = false
+      + disable_crd_hooks          = false
+      + disable_openapi_validation = false
+      + disable_webhooks           = false
+      + force_update               = false
+      + id                         = (known after apply)
+      + lint                       = false
+      + manifest                   = (known after apply)
+      + max_history                = 0
+      + metadata                   = (known after apply)
+      + name                       = "velero"
+      + namespace                  = "velero"
+      + pass_credentials           = false
+      + recreate_pods              = false
+      + render_subchart_notes      = true
+      + replace                    = false
+      + repository                 = "https://vmware-tanzu.github.io/helm-charts"
+      + reset_values               = false
+      + reuse_values               = false
+      + skip_crds                  = false
+      + status                     = "deployed"
+      + timeout                    = 900
+      + values                     = [
+          + <<-EOT
+                "configuration":
+                  "backupStorageLocation":
+                  - "bucket": "sa-p9-respaldos-201612218"
+                    "default": true
+                    "name": "default"
+                    "provider": "gcp"
+                  "volumeSnapshotLocation":
+                  - "config":
+                      "project": "p6-sa2s2026"
+                      "snapshotLocation": "us-central1"
+                    "name": "default"
+                    "provider": "gcp"
+                "credentials":
+                  "useSecret": false
+                "deployNodeAgent": true
+                "initContainers":
+                - "image": "velero/velero-plugin-for-gcp:v1.11.0"
+                  "imagePullPolicy": "IfNotPresent"
+                  "name": "velero-plugin-for-gcp"
+                  "volumeMounts":
+                  - "mountPath": "/target"
+                    "name": "plugins"
+            EOT,
+        ]
+      + verify                     = false
+      + version                    = "8.1.0"
+      + wait                       = true
+      + wait_for_jobs              = false
+    }
+
+  # kubernetes_limit_range.limites["prod"] will be created
+  + resource "kubernetes_limit_range" "limites" {
+      + id = (known after apply)
+
+      + metadata {
+          + generation       = (known after apply)
+          + name             = "sa-prod-limites"
+          + namespace        = "sa-prod"
+          + resource_version = (known after apply)
+          + uid              = (known after apply)
+        }
+
+      + spec {
+          + limit {
+              + default         = {
+                  + "cpu"    = "250m"
+                  + "memory" = "256Mi"
+                }
+              + default_request = {
+                  + "cpu"    = "100m"
+                  + "memory" = "128Mi"
+                }
+              + max             = {
+                  + "cpu"    = "1"
+                  + "memory" = "1Gi"
+                }
+              + type            = "Container"
+            }
+        }
+    }
+
+  # kubernetes_limit_range.limites["staging"] will be created
+  + resource "kubernetes_limit_range" "limites" {
+      + id = (known after apply)
+
+      + metadata {
+          + generation       = (known after apply)
+          + name             = "sa-staging-limites"
+          + namespace        = "sa-staging"
+          + resource_version = (known after apply)
+          + uid              = (known after apply)
+        }
+
+      + spec {
+          + limit {
+              + default         = {
+                  + "cpu"    = "250m"
+                  + "memory" = "256Mi"
+                }
+              + default_request = {
+                  + "cpu"    = "100m"
+                  + "memory" = "128Mi"
+                }
+              + max             = {
+                  + "cpu"    = "1"
+                  + "memory" = "1Gi"
+                }
+              + type            = "Container"
+            }
+        }
+    }
+
+  # kubernetes_namespace.ambientes["prod"] will be created
+  + resource "kubernetes_namespace" "ambientes" {
+      + id                               = (known after apply)
+      + wait_for_default_service_account = false
+
+      + metadata {
+          + generation       = (known after apply)
+          + labels           = {
+              + "app.kubernetes.io/managed-by"  = "terraform"
+              + "app.kubernetes.io/part-of"     = "sa-platform"
+              + "sa-platform/ambiente"          = "prod"
+              + "sa-platform/aplicar-politicas" = "bloquear"
+            }
+          + name             = "sa-prod"
+          + resource_version = (known after apply)
+          + uid              = (known after apply)
+        }
+    }
+
+  # kubernetes_namespace.ambientes["staging"] will be created
+  + resource "kubernetes_namespace" "ambientes" {
+      + id                               = (known after apply)
+      + wait_for_default_service_account = false
+
+      + metadata {
+          + generation       = (known after apply)
+          + labels           = {
+              + "app.kubernetes.io/managed-by"  = "terraform"
+              + "app.kubernetes.io/part-of"     = "sa-platform"
+              + "sa-platform/ambiente"          = "staging"
+              + "sa-platform/aplicar-politicas" = "auditar"
+            }
+          + name             = "sa-staging"
+          + resource_version = (known after apply)
+          + uid              = (known after apply)
+        }
+    }
+
+  # kubernetes_resource_quota.cuota["prod"] will be created
+  + resource "kubernetes_resource_quota" "cuota" {
+      + id = (known after apply)
+
+      + metadata {
+          + generation       = (known after apply)
+          + name             = "sa-prod-cuota"
+          + namespace        = "sa-prod"
+          + resource_version = (known after apply)
+          + uid              = (known after apply)
+        }
+
+      + spec {
+          + hard = {
+              + "limits.cpu"      = "8"
+              + "limits.memory"   = "10Gi"
+              + "pods"            = "40"
+              + "requests.cpu"    = "4"
+              + "requests.memory" = "6Gi"
+            }
+        }
+    }
+
+  # kubernetes_resource_quota.cuota["staging"] will be created
+  + resource "kubernetes_resource_quota" "cuota" {
+      + id = (known after apply)
+
+      + metadata {
+          + generation       = (known after apply)
+          + name             = "sa-staging-cuota"
+          + namespace        = "sa-staging"
+          + resource_version = (known after apply)
+          + uid              = (known after apply)
+        }
+
+      + spec {
+          + hard = {
+              + "limits.cpu"      = "4"
+              + "limits.memory"   = "4Gi"
+              + "pods"            = "20"
+              + "requests.cpu"    = "2"
+              + "requests.memory" = "2Gi"
+            }
+        }
+    }
+
+  # kubernetes_role.analisis["prod"] will be created
+  + resource "kubernetes_role" "analisis" {
+      + id = (known after apply)
+
+      + metadata {
+          + generation       = (known after apply)
+          + name             = "ejecutor-de-analisis"
+          + namespace        = "sa-prod"
+          + resource_version = (known after apply)
+          + uid              = (known after apply)
+        }
+
+      + rule {
+          + api_groups = [
+              + null,
+              + "batch",
+            ]
+          + resources  = [
+              + "jobs",
+              + "pods",
+              + "pods/log",
+            ]
+          + verbs      = [
+              + "create",
+              + "delete",
+              + "get",
+              + "list",
+              + "watch",
+            ]
+        }
+    }
+
+  # kubernetes_role.analisis["staging"] will be created
+  + resource "kubernetes_role" "analisis" {
+      + id = (known after apply)
+
+      + metadata {
+          + generation       = (known after apply)
+          + name             = "ejecutor-de-analisis"
+          + namespace        = "sa-staging"
+          + resource_version = (known after apply)
+          + uid              = (known after apply)
+        }
+
+      + rule {
+          + api_groups = [
+              + null,
+              + "batch",
+            ]
+          + resources  = [
+              + "jobs",
+              + "pods",
+              + "pods/log",
+            ]
+          + verbs      = [
+              + "create",
+              + "delete",
+              + "get",
+              + "list",
+              + "watch",
+            ]
+        }
+    }
+
+  # kubernetes_role.aplicador["prod"] will be created
+  + resource "kubernetes_role" "aplicador" {
+      + id = (known after apply)
+
+      + metadata {
+          + generation       = (known after apply)
+          + name             = "aplicador-de-cargas"
+          + namespace        = "sa-prod"
+          + resource_version = (known after apply)
+          + uid              = (known after apply)
+        }
+
+      + rule {
+          + api_groups = [
+              + null,
+              + "apps",
+              + "autoscaling",
+              + "batch",
+              + "networking.k8s.io",
+            ]
+          + resources  = [
+              + "*",
+            ]
+          + verbs      = [
+              + "create",
+              + "delete",
+              + "get",
+              + "list",
+              + "patch",
+              + "update",
+              + "watch",
+            ]
+        }
+      + rule {
+          + api_groups = [
+              + "argoproj.io",
+            ]
+          + resources  = [
+              + "analysisruns",
+              + "analysistemplates",
+              + "experiments",
+              + "rollouts",
+            ]
+          + verbs      = [
+              + "create",
+              + "delete",
+              + "get",
+              + "list",
+              + "patch",
+              + "update",
+              + "watch",
+            ]
+        }
+    }
+
+  # kubernetes_role.aplicador["staging"] will be created
+  + resource "kubernetes_role" "aplicador" {
+      + id = (known after apply)
+
+      + metadata {
+          + generation       = (known after apply)
+          + name             = "aplicador-de-cargas"
+          + namespace        = "sa-staging"
+          + resource_version = (known after apply)
+          + uid              = (known after apply)
+        }
+
+      + rule {
+          + api_groups = [
+              + null,
+              + "apps",
+              + "autoscaling",
+              + "batch",
+              + "networking.k8s.io",
+            ]
+          + resources  = [
+              + "*",
+            ]
+          + verbs      = [
+              + "create",
+              + "delete",
+              + "get",
+              + "list",
+              + "patch",
+              + "update",
+              + "watch",
+            ]
+        }
+      + rule {
+          + api_groups = [
+              + "argoproj.io",
+            ]
+          + resources  = [
+              + "analysisruns",
+              + "analysistemplates",
+              + "experiments",
+              + "rollouts",
+            ]
+          + verbs      = [
+              + "create",
+              + "delete",
+              + "get",
+              + "list",
+              + "patch",
+              + "update",
+              + "watch",
+            ]
+        }
+    }
+
+  # kubernetes_role.lector["prod"] will be created
+  + resource "kubernetes_role" "lector" {
+      + id = (known after apply)
+
+      + metadata {
+          + generation       = (known after apply)
+          + name             = "solo-lectura"
+          + namespace        = "sa-prod"
+          + resource_version = (known after apply)
+          + uid              = (known after apply)
+        }
+
+      + rule {
+          + api_groups = [
+              + null,
+              + "apps",
+              + "argoproj.io",
+            ]
+          + resources  = [
+              + "deployments",
+              + "events",
+              + "pods",
+              + "replicasets",
+              + "rollouts",
+              + "services",
+            ]
+          + verbs      = [
+              + "get",
+              + "list",
+              + "watch",
+            ]
+        }
+    }
+
+  # kubernetes_role.lector["staging"] will be created
+  + resource "kubernetes_role" "lector" {
+      + id = (known after apply)
+
+      + metadata {
+          + generation       = (known after apply)
+          + name             = "solo-lectura"
+          + namespace        = "sa-staging"
+          + resource_version = (known after apply)
+          + uid              = (known after apply)
+        }
+
+      + rule {
+          + api_groups = [
+              + null,
+              + "apps",
+              + "argoproj.io",
+            ]
+          + resources  = [
+              + "deployments",
+              + "events",
+              + "pods",
+              + "replicasets",
+              + "rollouts",
+              + "services",
+            ]
+          + verbs      = [
+              + "get",
+              + "list",
+              + "watch",
+            ]
+        }
+    }
+
+  # kubernetes_role_binding.analisis["prod"] will be created
+  + resource "kubernetes_role_binding" "analisis" {
+      + id = (known after apply)
+
+      + metadata {
+          + generation       = (known after apply)
+          + name             = "analisis-rollouts"
+          + namespace        = "sa-prod"
+          + resource_version = (known after apply)
+          + uid              = (known after apply)
+        }
+
+      + role_ref {
+          + api_group = "rbac.authorization.k8s.io"
+          + kind      = "Role"
+          + name      = "ejecutor-de-analisis"
+        }
+
+      + subject {
+          + api_group = (known after apply)
+          + kind      = "ServiceAccount"
+          + name      = "analisis-rollouts"
+          + namespace = "sa-prod"
+        }
+    }
+
+  # kubernetes_role_binding.analisis["staging"] will be created
+  + resource "kubernetes_role_binding" "analisis" {
+      + id = (known after apply)
+
+      + metadata {
+          + generation       = (known after apply)
+          + name             = "analisis-rollouts"
+          + namespace        = "sa-staging"
+          + resource_version = (known after apply)
+          + uid              = (known after apply)
+        }
+
+      + role_ref {
+          + api_group = "rbac.authorization.k8s.io"
+          + kind      = "Role"
+          + name      = "ejecutor-de-analisis"
+        }
+
+      + subject {
+          + api_group = (known after apply)
+          + kind      = "ServiceAccount"
+          + name      = "analisis-rollouts"
+          + namespace = "sa-staging"
+        }
+    }
+
+  # kubernetes_role_binding.aplicador["prod"] will be created
+  + resource "kubernetes_role_binding" "aplicador" {
+      + id = (known after apply)
+
+      + metadata {
+          + generation       = (known after apply)
+          + name             = "argocd-aplicador"
+          + namespace        = "sa-prod"
+          + resource_version = (known after apply)
+          + uid              = (known after apply)
+        }
+
+      + role_ref {
+          + api_group = "rbac.authorization.k8s.io"
+          + kind      = "Role"
+          + name      = "aplicador-de-cargas"
+        }
+
+      + subject {
+          + api_group = (known after apply)
+          + kind      = "ServiceAccount"
+          + name      = "argocd-application-controller"
+          + namespace = "argocd"
+        }
+    }
+
+  # kubernetes_role_binding.aplicador["staging"] will be created
+  + resource "kubernetes_role_binding" "aplicador" {
+      + id = (known after apply)
+
+      + metadata {
+          + generation       = (known after apply)
+          + name             = "argocd-aplicador"
+          + namespace        = "sa-staging"
+          + resource_version = (known after apply)
+          + uid              = (known after apply)
+        }
+
+      + role_ref {
+          + api_group = "rbac.authorization.k8s.io"
+          + kind      = "Role"
+          + name      = "aplicador-de-cargas"
+        }
+
+      + subject {
+          + api_group = (known after apply)
+          + kind      = "ServiceAccount"
+          + name      = "argocd-application-controller"
+          + namespace = "argocd"
+        }
+    }
+
+  # kubernetes_role_binding.lector["prod"] will be created
+  + resource "kubernetes_role_binding" "lector" {
+      + id = (known after apply)
+
+      + metadata {
+          + generation       = (known after apply)
+          + name             = "pipeline-lector"
+          + namespace        = "sa-prod"
+          + resource_version = (known after apply)
+          + uid              = (known after apply)
+        }
+
+      + role_ref {
+          + api_group = "rbac.authorization.k8s.io"
+          + kind      = "Role"
+          + name      = "solo-lectura"
+        }
+
+      + subject {
+          + api_group = (known after apply)
+          + kind      = "ServiceAccount"
+          + name      = "pipeline-lector"
+          + namespace = "sa-prod"
+        }
+    }
+
+  # kubernetes_role_binding.lector["staging"] will be created
+  + resource "kubernetes_role_binding" "lector" {
+      + id = (known after apply)
+
+      + metadata {
+          + generation       = (known after apply)
+          + name             = "pipeline-lector"
+          + namespace        = "sa-staging"
+          + resource_version = (known after apply)
+          + uid              = (known after apply)
+        }
+
+      + role_ref {
+          + api_group = "rbac.authorization.k8s.io"
+          + kind      = "Role"
+          + name      = "solo-lectura"
+        }
+
+      + subject {
+          + api_group = (known after apply)
+          + kind      = "ServiceAccount"
+          + name      = "pipeline-lector"
+          + namespace = "sa-staging"
+        }
+    }
+
+  # kubernetes_service_account.analisis["prod"] will be created
+  + resource "kubernetes_service_account" "analisis" {
+      + automount_service_account_token = true
+      + default_secret_name             = (known after apply)
+      + id                              = (known after apply)
+
+      + metadata {
+          + generation       = (known after apply)
+          + name             = "analisis-rollouts"
+          + namespace        = "sa-prod"
+          + resource_version = (known after apply)
+          + uid              = (known after apply)
+        }
+    }
+
+  # kubernetes_service_account.analisis["staging"] will be created
+  + resource "kubernetes_service_account" "analisis" {
+      + automount_service_account_token = true
+      + default_secret_name             = (known after apply)
+      + id                              = (known after apply)
+
+      + metadata {
+          + generation       = (known after apply)
+          + name             = "analisis-rollouts"
+          + namespace        = "sa-staging"
+          + resource_version = (known after apply)
+          + uid              = (known after apply)
+        }
+    }
+
+  # kubernetes_service_account.argocd_aplicador["prod"] will be created
+  + resource "kubernetes_service_account" "argocd_aplicador" {
+      + automount_service_account_token = true
+      + default_secret_name             = (known after apply)
+      + id                              = (known after apply)
+
+      + metadata {
+          + generation       = (known after apply)
+          + name             = "argocd-aplicador"
+          + namespace        = "sa-prod"
+          + resource_version = (known after apply)
+          + uid              = (known after apply)
+        }
+    }
+
+  # kubernetes_service_account.argocd_aplicador["staging"] will be created
+  + resource "kubernetes_service_account" "argocd_aplicador" {
+      + automount_service_account_token = true
+      + default_secret_name             = (known after apply)
+      + id                              = (known after apply)
+
+      + metadata {
+          + generation       = (known after apply)
+          + name             = "argocd-aplicador"
+          + namespace        = "sa-staging"
+          + resource_version = (known after apply)
+          + uid              = (known after apply)
+        }
+    }
+
+  # kubernetes_service_account.pipeline_lector["prod"] will be created
+  + resource "kubernetes_service_account" "pipeline_lector" {
+      + automount_service_account_token = true
+      + default_secret_name             = (known after apply)
+      + id                              = (known after apply)
+
+      + metadata {
+          + generation       = (known after apply)
+          + name             = "pipeline-lector"
+          + namespace        = "sa-prod"
+          + resource_version = (known after apply)
+          + uid              = (known after apply)
+        }
+    }
+
+  # kubernetes_service_account.pipeline_lector["staging"] will be created
+  + resource "kubernetes_service_account" "pipeline_lector" {
+      + automount_service_account_token = true
+      + default_secret_name             = (known after apply)
+      + id                              = (known after apply)
+
+      + metadata {
+          + generation       = (known after apply)
+          + name             = "pipeline-lector"
+          + namespace        = "sa-staging"
+          + resource_version = (known after apply)
+          + uid              = (known after apply)
+        }
+    }
+
+Plan: 32 to add, 0 to change, 0 to destroy.
+
+Changes to Outputs:
+  + bucket_respaldos = "sa-p9-respaldos-201612218"
+  + namespaces       = {
+      + sa-prod    = "bloquear"
+      + sa-staging = "auditar"
+    }
+  + nombre_cluster   = "sa-p9-cluster"
+  + proyecto         = "p6-sa2s2026"
+  + repo_gitops      = "https://github.com/susanpamela2520/Pr-cticas-SA-B-201612218-gitops"
+  + siguiente_paso   = <<-EOT
+        Infraestructura lista. El bootstrap continua con:
+        
+          1. Restaurar la llave de Sealed Secrets
+             bash P9/bootstrap/restaurar-llave.sh
+        
+          2. Aplicar la aplicacion raiz
+             kubectl apply -f P9/bootstrap/root-app.yaml
+        
+        Si ejecuta bootstrap.sh, ambos pasos ocurren automaticamente.
+    EOT
+  + zona             = "us-central1-a"
+
+─────────────────────────────────────────────────────────────────────────────
+
+Note: You didn't use the -out option to save this plan, so Terraform can't
+guarantee to take exactly these actions if you run "terraform apply" now.

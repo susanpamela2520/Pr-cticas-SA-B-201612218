@@ -1,0 +1,9 @@
+# Copie este archivo a terraform.tfvars y complete los valores.
+# terraform.tfvars NO se versiona.
+
+proyecto         = "CAMBIAR"
+region           = "us-central1"
+zona             = "us-central1-a"
+nombre_cluster   = "sa-p9-cluster"
+bucket_respaldos = "CAMBIAR-respaldos"
+repo_gitops      = "https://github.com/susanpamela2520/Pr-cticas-SA-B-201612218-gitops"

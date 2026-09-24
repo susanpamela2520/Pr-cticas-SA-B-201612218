@@ -1,0 +1,48 @@
+# ---------------------------------------------------------------------------
+# RESPALDOS PROGRAMADOS
+#
+# El destino es un bucket de Cloud Storage, externo al clúster: un respaldo
+# guardado dentro del mismo clúster que respalda no sirve para nada cuando
+# ese clúster desaparece.
+#
+# snapshotVolumes captura los discos persistentes, no solo los objetos de
+# Kubernetes. Sin eso se restauraria un volumen vacio.
+#
+# La retencion de 168 h (7 dias) equilibra costo y margen: si un dato se
+# corrompe un viernes, hay una semana para notarlo.
+# ---------------------------------------------------------------------------
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: respaldo-diario
+  namespace: velero
+spec:
+  # 02:00 UTC = 20:00 en Guatemala, fuera de la ventana de uso.
+  schedule: "0 2 * * *"
+  template:
+    includedNamespaces:
+      - sa-prod
+    snapshotVolumes: true
+    defaultVolumesToFsBackup: true
+    ttl: 168h
+    storageLocation: default
+---
+# Respaldo horario solo de la base de datos: acota el RPO del dato que
+# realmente duele perder, sin el costo de respaldar todo cada hora.
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: respaldo-datos-horario
+  namespace: velero
+spec:
+  schedule: "0 * * * *"
+  template:
+    includedNamespaces:
+      - sa-prod
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/component: base-de-datos
+    snapshotVolumes: true
+    defaultVolumesToFsBackup: true
+    ttl: 48h
+    storageLocation: default
