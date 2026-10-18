@@ -19,9 +19,9 @@
 | SLO declarados | Disponibilidad ≥ 99,5 % / 30 d · Latencia p95 < 500 ms en 95 % / 30 d |
 | Reglas de alerta | `observabilidad/prometheus-rules.yaml` (repo GitOps) |
 | Tablero | `P10/dashboards/operacion-senales-de-oro.json` |
-| Reversión por métricas | PENDIENTE — nombre del AnalysisRun fallido y del Rollout |
-| Recorrido síntoma a causa | `P10/docs/recorrido-sintoma-causa.md` — tiempo medido: PENDIENTE |
-| Video demostrativo | PENDIENTE — URL y minutaje |
+| Reversión por métricas | No ejecutada: depende de `http_requests_total`, ver Limitación reconocida. Se demuestra en vivo |
+| Recorrido síntoma a causa | `P10/docs/recorrido-sintoma-causa.md` — tiempo cronometrado durante la demostración |
+| Video demostrativo | Se presenta en la demostración presencial |
 
 ---
 
